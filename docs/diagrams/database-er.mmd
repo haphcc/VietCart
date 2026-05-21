@@ -1,0 +1,65 @@
+erDiagram
+  VIETCART_PRODUCT_PRODUCTS {
+    int id PK "AUTO_INCREMENT"
+    varchar name "NOT NULL"
+    text description
+    decimal price "DECIMAL(12,2), NOT NULL"
+    int stock "NOT NULL, DEFAULT 0"
+    varchar image_url "VARCHAR(500)"
+    timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
+    timestamp updated_at "ON UPDATE CURRENT_TIMESTAMP"
+  }
+
+  VIETCART_CART_CART_ITEMS {
+    int id PK "AUTO_INCREMENT"
+    int user_id "NOT NULL"
+    int product_id "NOT NULL"
+    int quantity "NOT NULL, DEFAULT 1"
+    timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
+    timestamp updated_at "ON UPDATE CURRENT_TIMESTAMP"
+  }
+
+  VIETCART_ORDER_ORDERS {
+    int id PK "AUTO_INCREMENT"
+    int user_id "NOT NULL"
+    decimal total_amount "DECIMAL(12,2), NOT NULL"
+    enum status "pending, confirmed, shipping, completed, cancelled"
+    timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
+    timestamp updated_at "ON UPDATE CURRENT_TIMESTAMP"
+  }
+
+  VIETCART_ORDER_ORDER_ITEMS {
+    int id PK "AUTO_INCREMENT"
+    int order_id FK "NOT NULL"
+    int product_id "NOT NULL"
+    int quantity "NOT NULL"
+    decimal price "DECIMAL(12,2), NOT NULL"
+    timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
+  }
+
+  VIETCART_PAYMENT_PAYMENTS {
+    int id PK "AUTO_INCREMENT"
+    int order_id "NOT NULL"
+    decimal amount "DECIMAL(12,2), NOT NULL"
+    enum method "cod, bank_transfer, momo, vnpay"
+    enum status "pending, paid, failed, refunded"
+    timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
+    timestamp updated_at "ON UPDATE CURRENT_TIMESTAMP"
+  }
+
+  VIETCART_NOTIFICATION_NOTIFICATIONS {
+    int id PK "AUTO_INCREMENT"
+    int user_id "NOT NULL"
+    varchar title "NOT NULL"
+    text message "NOT NULL"
+    enum type "system, order, payment, promotion"
+    boolean is_read "NOT NULL, DEFAULT FALSE"
+    timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
+  }
+
+  VIETCART_ORDER_ORDERS ||--o{ VIETCART_ORDER_ORDER_ITEMS : "fk_order_items_order"
+
+  %% Microservices database-per-service notes:
+  %% - cart_items.product_id stores Product Service product id but has no cross-database foreign key.
+  %% - order_items.product_id stores Product Service product id but has no cross-database foreign key.
+  %% - payments.order_id stores Order Service order id but has no cross-database foreign key.

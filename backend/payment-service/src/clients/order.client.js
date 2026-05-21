@@ -1,0 +1,10 @@
+import axios from 'axios';
+
+const baseURL = process.env.ORDER_SERVICE_URL || 'http://localhost:3003';
+
+export const orderClient = {
+  async getById(orderId) {
+    const response = await axios.get(`${baseURL}/orders/${orderId}`);
+    return response.data;
+  }
+};

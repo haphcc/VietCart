@@ -1,0 +1,18 @@
+flowchart LR
+  User[Customer Browser] --> Frontend[ReactJS + Vite]
+  Frontend --> Gateway[API Gateway]
+  Gateway --> Product[Product Service]
+  Gateway --> Cart[Cart Service]
+  Gateway --> Order[Order Service]
+  Gateway --> Payment[Payment Service]
+  Gateway --> Notification[Notification Service]
+  Product --> ProductDB[(vietcart_product)]
+  Cart --> CartDB[(vietcart_cart)]
+  Order --> OrderDB[(vietcart_order)]
+  Payment --> PaymentDB[(vietcart_payment)]
+  Notification --> NotificationDB[(vietcart_notification)]
+  Order --> Product
+  Order --> Cart
+  Order --> Notification
+  Payment --> Order
+
