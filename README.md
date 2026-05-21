@@ -31,13 +31,43 @@ VietCart la he thong thuong mai dien tu truc tuyen dung kien truc Microservices 
 1. Cai Node.js va bat MySQL trong XAMPP.
 2. Import `database/ecommerce_db.sql` vao phpMyAdmin hoac MySQL CLI.
 3. Copy cac file `.env.example` thanh `.env` trong tung service can chay.
-4. Cai dependency va chay tung service:
+4. Cai dependency tu thu muc goc:
 
-```bash
-cd backend/api-gateway
+```powershell
+cd C:\Users\phuoc\Downloads\VietCart
+npm install
+```
+
+5. Chay frontend:
+
+```powershell
+npm run dev:frontend
+```
+
+Mo trinh duyet tai `http://127.0.0.1:5173/` hoac URL Vite in ra trong terminal.
+
+6. Chay cac backend service can dung, moi service nen mo trong mot terminal rieng:
+
+```powershell
+npm run dev:api-gateway
+npm run dev:product-service
+npm run dev:cart-service
+npm run dev:order-service
+npm run dev:payment-service
+npm run dev:notification-service
+```
+
+## Lenh npm chinh
+
+- `npm run dev:frontend`: chay giao dien React/Vite.
+- `npm run build:frontend`: build frontend de kiem tra loi truoc khi nop/chay production.
+- `npm run dev:api-gateway`: chay API Gateway.
+- `npm run dev:<ten-service>`: chay tung service backend, vi du `dev:product-service`.
+
+Neu muon chay truc tiep trong tung thu muc van duoc:
+
+```powershell
+cd frontend/customer-web
 npm install
 npm run dev
 ```
-
-Lap lai voi cac service khac va frontend.
-

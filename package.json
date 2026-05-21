@@ -1,0 +1,31 @@
+{
+  "name": "vietcart",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend/customer-web",
+    "backend/api-gateway",
+    "backend/product-service",
+    "backend/cart-service",
+    "backend/order-service",
+    "backend/payment-service",
+    "backend/notification-service"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev -w vietcart-customer-web",
+    "build:frontend": "npm run build -w vietcart-customer-web",
+    "preview:frontend": "npm run preview -w vietcart-customer-web",
+    "dev:api-gateway": "npm run dev -w vietcart-api-gateway",
+    "dev:product-service": "npm run dev -w vietcart-product-service",
+    "dev:cart-service": "npm run dev -w vietcart-cart-service",
+    "dev:order-service": "npm run dev -w vietcart-order-service",
+    "dev:payment-service": "npm run dev -w vietcart-payment-service",
+    "dev:notification-service": "npm run dev -w vietcart-notification-service",
+    "start:api-gateway": "npm run start -w vietcart-api-gateway",
+    "start:product-service": "npm run start -w vietcart-product-service",
+    "start:cart-service": "npm run start -w vietcart-cart-service",
+    "start:order-service": "npm run start -w vietcart-order-service",
+    "start:payment-service": "npm run start -w vietcart-payment-service",
+    "start:notification-service": "npm run start -w vietcart-notification-service"
+  }
+}
