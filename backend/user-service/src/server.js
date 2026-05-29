@@ -2,22 +2,22 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import morgan from 'morgan';
-import notificationRoutes from './routes/notification.routes.js';
+import userRoutes from './routes/user.routes.js';
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3005;
+const port = process.env.PORT || 3006;
 
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
 app.get('/health', (req, res) => {
-  res.json({ service: 'notification-service', status: 'ok' });
+  res.json({ service: 'user-service', status: 'ok' });
 });
 
-app.use('/notifications', notificationRoutes);
+app.use('/users', userRoutes);
 
 app.use((error, req, res, next) => {
   const statusCode = error.statusCode || 500;
@@ -27,6 +27,5 @@ app.use((error, req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`Notification Service running on port ${port}`);
+  console.log(`User Service running on port ${port}`);
 });
-

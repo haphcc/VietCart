@@ -41,3 +41,9 @@ services:
     env_file:
       - ./backend/notification-service/.env.example
 
+  user-service:
+    build: ./backend/user-service
+    ports:
+      - "3006:3006"
+    env_file:
+      - ./backend/user-service/.env.example

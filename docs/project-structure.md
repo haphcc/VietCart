@@ -9,6 +9,7 @@ VietCart/
   backend/order-service/
   backend/payment-service/
   backend/notification-service/
+  backend/user-service/
   database/
   shared/
   docs/

@@ -9,9 +9,11 @@
     "backend/cart-service",
     "backend/order-service",
     "backend/payment-service",
-    "backend/notification-service"
+    "backend/notification-service",
+    "backend/user-service"
   ],
   "scripts": {
+    "dev": "node scripts/dev.mjs",
     "dev:frontend": "npm run dev -w vietcart-customer-web",
     "build:frontend": "npm run build -w vietcart-customer-web",
     "preview:frontend": "npm run preview -w vietcart-customer-web",
@@ -21,11 +23,14 @@
     "dev:order-service": "npm run dev -w vietcart-order-service",
     "dev:payment-service": "npm run dev -w vietcart-payment-service",
     "dev:notification-service": "npm run dev -w vietcart-notification-service",
+    "dev:user-service": "npm run dev -w vietcart-user-service",
+    "dev:member5": "npm run dev",
     "start:api-gateway": "npm run start -w vietcart-api-gateway",
     "start:product-service": "npm run start -w vietcart-product-service",
     "start:cart-service": "npm run start -w vietcart-cart-service",
     "start:order-service": "npm run start -w vietcart-order-service",
     "start:payment-service": "npm run start -w vietcart-payment-service",
-    "start:notification-service": "npm run start -w vietcart-notification-service"
+    "start:notification-service": "npm run start -w vietcart-notification-service",
+    "start:user-service": "npm run start -w vietcart-user-service"
   }
 }

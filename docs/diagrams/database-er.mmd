@@ -57,9 +57,23 @@ erDiagram
     timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
   }
 
+  VIETCART_USER_USERS {
+    int id PK "AUTO_INCREMENT"
+    varchar name "NOT NULL"
+    varchar email "UNIQUE, NOT NULL"
+    varchar password_hash "NOT NULL"
+    varchar phone
+    varchar address
+    enum role "customer, admin"
+    boolean is_active "NOT NULL, DEFAULT TRUE"
+    timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
+    timestamp updated_at "ON UPDATE CURRENT_TIMESTAMP"
+  }
+
   VIETCART_ORDER_ORDERS ||--o{ VIETCART_ORDER_ORDER_ITEMS : "fk_order_items_order"
 
   %% Microservices database-per-service notes:
   %% - cart_items.product_id stores Product Service product id but has no cross-database foreign key.
   %% - order_items.product_id stores Product Service product id but has no cross-database foreign key.
   %% - payments.order_id stores Order Service order id but has no cross-database foreign key.
+  %% - cart_items.user_id, orders.user_id and notifications.user_id store User Service ids without cross-database foreign keys.

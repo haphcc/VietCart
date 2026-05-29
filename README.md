@@ -22,6 +22,8 @@ VietCart la he thong thuong mai dien tu truc tuyen dung kien truc Microservices 
 - `frontend/customer-web`: ung dung ReactJS cho khach hang.
 - `backend/api-gateway`: cong vao duy nhat cho frontend, dieu phoi request den cac service.
 - `backend/*-service`: cac microservice doc lap.
+- `backend/user-service`: dang ky, dang nhap, cap JWT va tra thong tin nguoi dung.
+- `backend/notification-service`: luu thong bao, danh dau da doc va gui email neu co SMTP.
 - `database`: script tao database/table cho MySQL.
 - `shared`: hang so va tien ich dung chung.
 - `docs`: noi viet noi dung bao cao va so do kien truc.
@@ -29,40 +31,47 @@ VietCart la he thong thuong mai dien tu truc tuyen dung kien truc Microservices 
 ## Chay nhanh
 
 1. Cai Node.js va bat MySQL trong XAMPP.
-2. Import `database/ecommerce_db.sql` vao phpMyAdmin hoac MySQL CLI.
-3. Copy cac file `.env.example` thanh `.env` trong tung service can chay.
+2. Import database mot lan neu chua co du lieu:
+
+```powershell
+& "C:\xampp\mysql\bin\mysql.exe" --default-character-set=utf8mb4 -u root -e "SOURCE database/product-service.sql; SOURCE database/cart-service.sql; SOURCE database/order-service.sql; SOURCE database/payment-service.sql; SOURCE database/notification-service.sql; SOURCE database/user-service.sql;"
+```
+
+3. Copy cac file `.env.example` thanh `.env` trong tung service can chay neu can doi cau hinh mac dinh.
 4. Cai dependency tu thu muc goc:
 
 ```powershell
-cd C:\Users\phuoc\Downloads\VietCart
 npm install
 ```
 
-5. Chay frontend:
+5. Chay toan bo frontend va backend bang mot lenh:
 
 ```powershell
-npm run dev:frontend
+npm run dev
 ```
 
-Mo trinh duyet tai `http://127.0.0.1:5173/` hoac URL Vite in ra trong terminal.
+Mo trinh duyet tai `http://127.0.0.1:5173/` hoac URL Vite in ra trong terminal. Nhan `Ctrl + C` de dung tat ca service.
 
-6. Chay cac backend service can dung, moi service nen mo trong mot terminal rieng:
+Neu lenh bao port dang duoc su dung, hay dung cac terminal dang chay truoc do bang `Ctrl + C` roi chay lai `npm run dev`.
 
-```powershell
-npm run dev:api-gateway
-npm run dev:product-service
-npm run dev:cart-service
-npm run dev:order-service
-npm run dev:payment-service
-npm run dev:notification-service
-```
+Tai khoan demo sau khi import database:
+
+- Email: `demo@vietcart.local`
+- Mat khau: `123456`
+
+Neu muon test gui email that, cau hinh `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` trong `backend/notification-service/.env`. Neu chua cau hinh SMTP, notification van duoc luu va email se co trang thai `skipped`.
 
 ## Lenh npm chinh
 
+- `npm run dev`: chay toan bo frontend va cac backend service cung luc.
 - `npm run dev:frontend`: chay giao dien React/Vite.
 - `npm run build:frontend`: build frontend de kiem tra loi truoc khi nop/chay production.
 - `npm run dev:api-gateway`: chay API Gateway.
-- `npm run dev:<ten-service>`: chay tung service backend, vi du `dev:product-service`.
+- `npm run dev:notification-service`: chay Notification Service.
+- `npm run dev:user-service`: chay User Service.
+- `npm run dev:<ten-service>`: chay rieng tung service backend, vi du `dev:product-service`.
+
+
 
 Neu muon chay truc tiep trong tung thu muc van duoc:
 

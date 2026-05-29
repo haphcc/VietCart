@@ -3,4 +3,5 @@ SOURCE database/cart-service.sql;
 SOURCE database/order-service.sql;
 SOURCE database/payment-service.sql;
 SOURCE database/notification-service.sql;
+SOURCE database/user-service.sql;
 

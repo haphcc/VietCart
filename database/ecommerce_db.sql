@@ -3,6 +3,7 @@ CREATE DATABASE IF NOT EXISTS vietcart_cart CHARACTER SET utf8mb4 COLLATE utf8mb
 CREATE DATABASE IF NOT EXISTS vietcart_order CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE DATABASE IF NOT EXISTS vietcart_payment CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE DATABASE IF NOT EXISTS vietcart_notification CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS vietcart_user CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE vietcart_product;
 CREATE TABLE IF NOT EXISTS products (
@@ -71,5 +72,19 @@ CREATE TABLE IF NOT EXISTS notifications (
   type ENUM('system', 'order', 'payment', 'promotion') NOT NULL DEFAULT 'system',
   is_read BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+USE vietcart_user;
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  phone VARCHAR(30),
+  address VARCHAR(500),
+  role ENUM('customer', 'admin') NOT NULL DEFAULT 'customer',
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 

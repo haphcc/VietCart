@@ -21,7 +21,8 @@ VietCart/
 |   |-- cart-service/                 -> Quan ly gio hang
 |   |-- order-service/                -> Tao va quan ly don hang
 |   |-- payment-service/              -> Xu ly thanh toan
-|   `-- notification-service/         -> Gui thong bao/email
+|   |-- notification-service/         -> Gui thong bao/email
+|   `-- user-service/                 -> Dang ky, dang nhap va quan ly user
 |
 |-- database/                         -> Script MySQL cho XAMPP
 |
