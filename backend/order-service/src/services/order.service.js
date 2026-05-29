@@ -16,13 +16,24 @@ export const orderService = {
   },
 
   async findItemsByOrderId(orderId) {
-    const [rows] = await pool.query(`
-      SELECT oi.*, p.name as product_name, p.image_url 
-      FROM order_items oi 
-      JOIN vietcart_product.products p ON oi.product_id = p.id
-      WHERE oi.order_id = ?
-    `, [orderId]);
-    return rows;
+    const [items] = await pool.query('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
+    return Promise.all(items.map(async (item) => {
+      try {
+        const product = await productClient.getById(item.product_id);
+        return {
+          ...item,
+          product_name: product.name,
+          image_url: product.image_url
+        };
+      } catch (error) {
+        console.warn(`Product detail lookup skipped for product ${item.product_id}: ${error.message}`);
+        return {
+          ...item,
+          product_name: `Product #${item.product_id}`,
+          image_url: null
+        };
+      }
+    }));
   },
 
   async updateStatus(id, status) {
