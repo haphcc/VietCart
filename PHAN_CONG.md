@@ -9,8 +9,8 @@ Kiến trúc: Microservices + API Gateway
 | Thành viên | Câu hỏi đảm nhận | Chương đảm nhận | Nhiệm vụ lý thuyết | Nhiệm vụ thực hành | Deadline |
 | --- | --- | --- | --- | --- | --- |
 | Thành viên 1 | Câu 1, Câu 2 | Chương I & II | Xây dựng lý thuyết về mô hình kiến trúc Microservices, vẽ sơ đồ, viết đặc tả kiến trúc | Thiết lập API Gateway, cấu trúc thư mục dự án, quản lý luồng định tuyến, thiết kế CSDL để kết nối | Code: 22/5, Báo cáo: 27/5 |
-| Thành viên 2 | Câu 3 | Chương III | Phân tích vấn đề quá tải và giải pháp cache/queue, đề xuất 2 giải pháp | Lập trình Cart Service, xử lý cache hoặc queue giảm tải cho giỏ hàng | Code: 24/5, Báo cáo: 28/5 |
-| Thành viên 3 | Câu 4 | Chương IV | Phân tích bài toán đồng bộ dữ liệu, nguyên nhân Saga/Distributed Lock, đề xuất 1 phương án đảm bảo đồng bộ | Lập trình Product Service và Order Service, xử lý logic đồng bộ tồn kho | Code: 25/5, Báo cáo: 28/5 |
+| Thành viên 2 | Câu 3 | Chương III | Phân tích vấn đề quá tải và giải pháp cache/queue, đề xuất 2 giải pháp | Lập trình Cart Service và Order Service, xử lý luồng giỏ hàng -> xác nhận đơn hàng -> tạo đơn | Code: 24/5, Báo cáo: 28/5 |
+| Thành viên 3 | Câu 4 | Chương IV | Phân tích bài toán đồng bộ dữ liệu, nguyên nhân Saga/Distributed Lock, đề xuất 1 phương án đảm bảo đồng bộ | Lập trình Product Service, xử lý logic đồng bộ tồn kho; hỗ trợ một phần Cart Service | Code: 25/5, Báo cáo: 28/5 |
 | Thành viên 4 | Câu 5 | Chương V | Tổng hợp kết quả thử nghiệm và viết khuyến nghị thực tế | Xây dựng kịch bản test/load testing bằng Apache Benchmark, dùng công cụ đo hiệu năng | Code: 26/5, Báo cáo: 28/5 |
 | Thành viên 5 | Tổng hợp | Mục lục & Phụ lục | Biên tập, định dạng Word, viết lời cảm ơn/cảm ơn, quản lý tài liệu tham khảo | Lập trình User Service hoặc Notification Service, tích hợp gửi email/thông báo | Báo cáo: 29/5 |
 
@@ -60,12 +60,22 @@ Phạm vi chính:
 - `frontend/customer-web/src/api/cartApi.js`: API client gọi Cart Service qua Gateway.
 - `frontend/customer-web/src/pages/CartPage.jsx`: giao diện giỏ hàng.
 - `frontend/customer-web/src/components/CartItem.jsx`: component item trong giỏ hàng.
+- `backend/order-service/`: xây dựng Order Service và luồng tạo đơn hàng.
+- `backend/order-service/src/routes/order.routes.js`: API đơn hàng.
+- `backend/order-service/src/controllers/order.controller.js`: xử lý request đơn hàng.
+- `backend/order-service/src/services/order.service.js`: logic tạo đơn hàng, tính tổng tiền, cập nhật trạng thái đơn hàng.
+- `backend/order-service/src/clients/*.client.js`: gọi Product, Cart, User, Notification Service khi cần.
+- `database/order-service.sql`: bảng đơn hàng và chi tiết đơn hàng.
+- `frontend/customer-web/src/api/orderApi.js`: API client đơn hàng.
+- `frontend/customer-web/src/pages/CheckoutPage.jsx`: giao diện xác nhận đặt hàng/thanh toán.
+- `frontend/customer-web/src/pages/OrderHistoryPage.jsx`: giao diện lịch sử đơn hàng.
 
 Lưu ý:
 
 - Cần giải thích vấn đề quá tải khi nhiều người dùng thêm sản phẩm vào giỏ cùng lúc.
 - Nếu dùng cache, nêu rõ dữ liệu nào cache và thời điểm đồng bộ lại MySQL.
 - Nếu dùng queue, mô tả luồng request vào hàng đợi và worker xử lý sau.
+- Luồng mua hàng phải đi qua giỏ hàng trước, sau đó mới xác nhận đơn hàng.
 
 ### Thành viên 3 - Câu 4
 
@@ -76,18 +86,14 @@ Phạm vi chính:
 - `backend/product-service/src/routes/product.routes.js`: API sản phẩm.
 - `backend/product-service/src/controllers/product.controller.js`: xử lý request sản phẩm.
 - `backend/product-service/src/services/product.service.js`: logic truy vấn sản phẩm, tồn kho.
-- `backend/order-service/`: xây dựng Order Service.
-- `backend/order-service/src/routes/order.routes.js`: API đơn hàng.
-- `backend/order-service/src/controllers/order.controller.js`: xử lý request đơn hàng.
-- `backend/order-service/src/services/order.service.js`: logic tạo đơn hàng, tính tổng tiền.
-- `backend/order-service/src/clients/*.client.js`: gọi Product, Cart, Notification Service.
 - `database/product-service.sql`: bảng sản phẩm.
-- `database/order-service.sql`: bảng đơn hàng và chi tiết đơn hàng.
 - `frontend/customer-web/src/api/productApi.js`: API client sản phẩm.
-- `frontend/customer-web/src/api/orderApi.js`: API client đơn hàng.
 - `frontend/customer-web/src/api/paymentApi.js`: API client thanh toán.
-- `frontend/customer-web/src/pages/ProductListPage.jsx`, `ProductDetailPage.jsx`, `OrderHistoryPage.jsx`: giao diện liên quan.
-- `frontend/customer-web/src/pages/CheckoutPage.jsx`: giao diện xác nhận đặt hàng/thanh toán.
+- `frontend/customer-web/src/pages/ProductListPage.jsx`, `ProductDetailPage.jsx`: giao diện liên quan đến sản phẩm.
+- Hỗ trợ một phần Cart Service theo nhu cầu tích hợp:
+  - `backend/cart-service/src/controllers/cart.controller.js`
+  - `backend/cart-service/src/routes/cart.routes.js`
+  - `backend/cart-service/src/services/cart.service.js`
 
 Lưu ý:
 
@@ -153,8 +159,8 @@ Lưu ý:
 
 1. Thành viên 1 hoàn thành API Gateway và CSDL nền.
 2. Thành viên 3 hoàn thành Product Service để có dữ liệu sản phẩm.
-3. Thành viên 2 hoàn thành Cart Service.
-4. Thành viên 3 hoàn thành Order Service và luồng tạo đơn.
+3. Thành viên 2 hoàn thành Cart Service và Order Service.
+4. Thành viên 2 tích hợp luồng giỏ hàng -> xác nhận đơn hàng -> tạo đơn.
 5. Thành viên 5 hoàn thành Notification Service.
 6. Thành viên 4 chạy load test và tổng hợp kết quả.
 7. Thành viên 5 gom báo cáo Word, kiểm tra định dạng và phụ lục.

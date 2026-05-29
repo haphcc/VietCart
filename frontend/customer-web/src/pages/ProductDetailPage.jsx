@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { cartApi } from '../api/cartApi.js';
 import { productApi } from '../api/productApi.js';
+import { getStoredAuth } from '../utils/authStorage.js';
 
 const productIcons = {
   1: '👕', 2: '🎒', 3: '🎧', 4: '🖱️', 5: '⌨️',
@@ -34,8 +36,11 @@ export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
   const [error, setError] = useState(null);
+  const [cartMessage, setCartMessage] = useState(null);
   const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
@@ -48,15 +53,14 @@ export default function ProductDetailPage() {
         const res = await productApi.getById(id);
         if (!cancelled) {
           setProduct(res.data);
+          setQuantity(1);
         }
       } catch (err) {
         if (!cancelled) {
           console.error('Lỗi khi tải chi tiết sản phẩm:', err);
-          if (err.response && err.response.status === 404) {
-            setError('Sản phẩm không tồn tại hoặc đã bị xóa.');
-          } else {
-            setError('Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.');
-          }
+          setError(err.response?.status === 404
+            ? 'Sản phẩm không tồn tại hoặc đã bị xóa.'
+            : 'Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.');
         }
       } finally {
         if (!cancelled) {
@@ -69,13 +73,35 @@ export default function ProductDetailPage() {
     return () => { cancelled = true; };
   }, [id]);
 
+  async function handleAddToCart() {
+    if (!product || product.stock <= 0) return;
+
+    const auth = getStoredAuth();
+    const userId = auth?.user?.id || 1;
+
+    try {
+      setAdding(true);
+      setCartMessage(null);
+      await cartApi.addItem({
+        user_id: userId,
+        product_id: product.id,
+        quantity
+      });
+      navigate('/cart', { state: { message: 'Sản phẩm đã được thêm vào giỏ hàng.' } });
+    } catch (err) {
+      console.error('Lỗi khi thêm vào giỏ hàng:', err);
+      setCartMessage(err.response?.data?.message || 'Không thể thêm sản phẩm vào giỏ hàng.');
+    } finally {
+      setAdding(false);
+    }
+  }
+
   const icon = product ? (productIcons[product.id] || '📦') : '📦';
   const inStock = product ? product.stock > 0 : false;
   const showRealImg = product && product.image_url && !product.image_url.includes('example.com') && !imgError;
 
   return (
     <section className="page-section">
-      {/* Breadcrumb */}
       <nav className="product-detail-breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span className="separator">/</span>
@@ -84,25 +110,19 @@ export default function ProductDetailPage() {
         <span>{product ? product.name : 'Chi tiết'}</span>
       </nav>
 
-      {/* Loading */}
       {loading && <DetailSkeleton />}
 
-      {/* Error */}
       {error && (
         <div className="empty-state">
-          <h2>😔 Lỗi</h2>
+          <h2>Lỗi</h2>
           <p>{error}</p>
-          <Link to="/products" className="btn btn-primary">
-            ← Quay lại danh sách
-          </Link>
+          <Link to="/products" className="btn btn-primary">Quay lại danh sách</Link>
         </div>
       )}
 
-      {/* Product Detail */}
       {!loading && !error && product && (
         <div className="product-detail-card">
           <div className="product-detail-layout">
-            {/* Ảnh sản phẩm */}
             <div className="product-detail-img-section">
               {showRealImg ? (
                 <img
@@ -115,20 +135,15 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Thông tin chi tiết */}
             <div className="product-detail-info">
               <span className="product-detail-category">Sản phẩm VietCart</span>
-
               <h1 className="product-detail-name">{product.name}</h1>
-
               <p className="product-detail-desc">{product.description}</p>
 
-              {/* Giá */}
               <div className="detail-price">
-                {formatPrice(product.price)}<span className="currency">₫</span>
+                {formatPrice(product.price)}<span className="currency">đ</span>
               </div>
 
-              {/* Meta info */}
               <div className="product-detail-meta">
                 <div className="product-detail-meta-row">
                   <span className="meta-row-label">Tình trạng</span>
@@ -150,19 +165,46 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
-              {/* Actions */}
               <div className="product-detail-actions">
-                <button
-                  className="btn-cart"
-                  disabled={!inStock}
-                  onClick={() => navigate('/checkout', { state: { product } })}
-                >
-                  ⚡ {inStock ? 'Mua ngay' : 'Hết hàng'}
+                <div className="quantity-control detail-quantity-control">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+                    disabled={!inStock || adding}
+                    aria-label="Giảm số lượng"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max={product.stock}
+                    value={quantity}
+                    disabled={!inStock || adding}
+                    onChange={(event) => {
+                      const nextValue = Number(event.target.value);
+                      if (Number.isNaN(nextValue)) return;
+                      setQuantity(Math.min(product.stock, Math.max(1, nextValue)));
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((current) => Math.min(product.stock, current + 1))}
+                    disabled={!inStock || adding || quantity >= product.stock}
+                    aria-label="Tăng số lượng"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <button className="btn-cart" disabled={!inStock || adding} onClick={handleAddToCart}>
+                  {adding ? 'Đang thêm...' : inStock ? 'Thêm vào giỏ hàng' : 'Hết hàng'}
                 </button>
-                <Link to="/products" className="btn-back">
-                  ← Quay lại
-                </Link>
+
+                <Link to="/products" className="btn-back">Quay lại</Link>
               </div>
+
+              {cartMessage && <div className="alert-error">{cartMessage}</div>}
             </div>
           </div>
         </div>

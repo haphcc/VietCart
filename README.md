@@ -12,8 +12,8 @@ VietCart là hệ thống thương mại điện tử trực tuyến dùng kiế
 ## Phân công theo câu hỏi
 
 - Câu 1, Câu 2: Chương I & II, mô hình kiến trúc Microservices, sơ đồ, viết đặc tả kiến trúc, thiết lập API Gateway, cấu trúc thư mục, routing và thiết kế CSDL kết nối.
-- Câu 3: Chương III, cache/queue và Cart Service.
-- Câu 4: Chương IV, đồng bộ dữ liệu và Product Service, Order Service.
+- Câu 3: Chương III, cache/queue, Cart Service và luồng Order Service/đơn hàng do thành viên 2 phụ trách.
+- Câu 4: Chương IV, đồng bộ dữ liệu và Product Service do thành viên 3 phụ trách; thành viên 3 có hỗ trợ một phần Cart Service.
 - Câu 5: Chương V, kiểm thử load test và tổng hợp kết quả.
 - Tổng hợp: User Service/Notification Service, mục lục, phụ lục, tài liệu tham khảo.
 
