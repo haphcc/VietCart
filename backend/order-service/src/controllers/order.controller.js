@@ -37,7 +37,10 @@ export async function updateOrderStatus(req, res, next) {
     const order = await orderService.updateStatus(req.params.id, status);
     res.json(order);
   } catch (error) {
-    next(error);
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+    return next(error);
   }
 }
 

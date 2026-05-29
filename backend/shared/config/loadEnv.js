@@ -3,14 +3,27 @@ import { existsSync } from 'fs';
 import { resolve } from 'path';
 
 export function loadEnv(baseDir = process.cwd()) {
-  const envPath = resolve(baseDir, '.env');
-  const examplePath = resolve(baseDir, '.env.example');
+  const candidates = [
+    resolve(baseDir, '.env'),
+    resolve(baseDir, '..', '.env'),
+    resolve(baseDir, '..', '..', '.env')
+  ];
 
-  if (existsSync(envPath)) {
-    dotenv.config({ path: envPath });
+  const exampleCandidates = [
+    resolve(baseDir, '.env.example'),
+    resolve(baseDir, '..', '.env.example'),
+    resolve(baseDir, '..', '..', '.env.example')
+  ];
+
+  for (const path of candidates) {
+    if (existsSync(path)) {
+      dotenv.config({ path, override: false });
+    }
   }
 
-  if (existsSync(examplePath)) {
-    dotenv.config({ path: examplePath, override: false });
+  for (const path of exampleCandidates) {
+    if (existsSync(path)) {
+      dotenv.config({ path, override: false });
+    }
   }
 }

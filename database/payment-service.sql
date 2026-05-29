@@ -1,17 +1,23 @@
 CREATE DATABASE IF NOT EXISTS vietcart_payment CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE vietcart_payment;
 
+DROP TABLE IF EXISTS payments;
+
 CREATE TABLE IF NOT EXISTS payments (
   id INT AUTO_INCREMENT PRIMARY KEY,
   order_id INT NOT NULL,
   amount DECIMAL(12, 2) NOT NULL,
   method ENUM('cod', 'bank_transfer', 'momo', 'vnpay') NOT NULL DEFAULT 'cod',
   status ENUM('pending', 'paid', 'failed', 'refunded') NOT NULL DEFAULT 'pending',
+  payos_order_code BIGINT UNIQUE,
+  payos_payment_link_id VARCHAR(100),
+  payos_checkout_url VARCHAR(500),
+  payos_qr_code TEXT,
+  transaction_reference VARCHAR(100),
+  paid_at TIMESTAMP NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
-TRUNCATE TABLE payments;
 
 INSERT INTO payments (order_id, amount, method, status) VALUES
 (1, 628000, 'momo', 'paid'),

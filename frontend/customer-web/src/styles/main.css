@@ -1786,6 +1786,92 @@ nav {
   font-weight: 600;
 }
 
+.payment-methods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.payment-method-option {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 52px;
+  padding: 0.875rem 1rem;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-method-option:hover,
+.payment-method-option.selected {
+  border-color: var(--primary);
+  background: #eff6ff;
+  color: var(--gray-900);
+}
+
+.payment-method-option input {
+  margin: 0;
+}
+
+.payos-panel {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding: 2rem;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.payos-qr-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  border: 1px dashed var(--gray-300);
+  border-radius: var(--radius-md);
+  background: #f8fafc;
+}
+
+.payos-qr-box img {
+  width: 260px;
+  height: 260px;
+}
+
+.payos-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.payos-details h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.payos-details p {
+  margin: 0;
+  color: var(--gray-700);
+}
+
+@media (max-width: 768px) {
+  .payment-methods,
+  .payos-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .payos-panel {
+    padding: 1.25rem;
+  }
+}
+
 .order-items-list {
   display: flex;
   flex-direction: column;

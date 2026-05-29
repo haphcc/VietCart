@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import QRCode from 'qrcode';
 import { cartApi } from '../api/cartApi.js';
 import { orderApi } from '../api/orderApi.js';
+import { paymentApi } from '../api/paymentApi.js';
 import { productApi } from '../api/productApi.js';
 import { userApi } from '../api/userApi.js';
 import { getStoredAuth } from '../utils/authStorage.js';
@@ -30,6 +32,10 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
   const [error, setError] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [payosPayment, setPayosPayment] = useState(null);
+  const [payosQrImage, setPayosQrImage] = useState('');
+  const [checkingPayment, setCheckingPayment] = useState(false);
 
   const total = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0);
 
@@ -95,6 +101,12 @@ export default function CheckoutPage() {
     setFormData((current) => ({ ...current, [name]: value }));
   };
 
+  const handlePaymentMethodChange = (event) => {
+    setPaymentMethod(event.target.value);
+    setPayosPayment(null);
+    setPayosQrImage('');
+  };
+
   async function updateQuantity(item, quantity) {
     const nextQuantity = Math.max(0, Math.min(Number(item.stock || quantity), quantity));
 
@@ -129,16 +141,55 @@ export default function CheckoutPage() {
     try {
       setSubmitting(true);
       setError(null);
-      await orderApi.create({
+      const orderRes = await orderApi.create({
         user_id: currentUser.id,
         items: items.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity
         })),
-        shipping_info: formData
+        shipping_info: formData,
+        payment_method: paymentMethod
       });
 
-      navigate('/orders', { state: { message: 'Đặt hàng thành công!' } });
+      const order = orderRes.data;
+      try {
+        const paymentRes = await paymentApi.create({
+          order_id: order.id,
+          amount: order.total_amount,
+          method: paymentMethod,
+          buyer: formData,
+          items: items.map((item) => ({
+            product_id: item.product_id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
+          }))
+        });
+
+        if (paymentMethod === 'bank_transfer') {
+          const payment = paymentRes.data;
+          const qrImage = await QRCode.toDataURL(payment.payos_qr_code, {
+            errorCorrectionLevel: 'M',
+            margin: 1,
+            width: 260
+          });
+          setPayosPayment(payment);
+          setPayosQrImage(qrImage);
+          setItems([]);
+          return;
+        }
+
+        navigate('/orders', { state: { message: 'Đặt hàng COD thành công!' } });
+      } catch (paymentError) {
+        if (paymentMethod === 'bank_transfer') {
+          try {
+            await orderApi.updateStatus(order.id, 'cancelled');
+          } catch (cancelError) {
+            console.warn('Không thể hủy đơn sau khi tạo PayOS thất bại:', cancelError);
+          }
+        }
+        throw paymentError;
+      }
     } catch (err) {
       console.error('Lỗi khi đặt hàng:', err);
       setError(err.response?.data?.message || 'Đã xảy ra lỗi hệ thống khi xử lý đơn hàng.');
@@ -146,6 +197,64 @@ export default function CheckoutPage() {
       setSubmitting(false);
     }
   };
+
+  const handleCheckPayosStatus = async () => {
+    if (!payosPayment?.order_id) return;
+
+    try {
+      setCheckingPayment(true);
+      setError(null);
+      const res = await paymentApi.syncPayosStatus(payosPayment.order_id);
+      if (res.data.status === 'paid') {
+        navigate('/orders', { state: { message: 'Thanh toán chuyển khoản thành công!' } });
+        return;
+      }
+      setError('Chưa ghi nhận thanh toán. Vui lòng thử lại sau ít phút.');
+    } catch (err) {
+      console.error('Lỗi khi kiểm tra PayOS:', err);
+      setError(err.response?.data?.message || 'Không thể kiểm tra trạng thái thanh toán.');
+    } finally {
+      setCheckingPayment(false);
+    }
+  };
+
+  if (payosPayment) {
+    return (
+      <section className="page-section checkout-page">
+        <h1 className="section-title">Thanh toán chuyển khoản</h1>
+        {error && <div className="alert-error"><strong>Lỗi:</strong> {error}</div>}
+        <div className="payos-panel">
+          <div className="payos-qr-box">
+            {payosQrImage && <img src={payosQrImage} alt="PayOS QR" />}
+          </div>
+          <div className="payos-details">
+            <h2>Đơn hàng #{payosPayment.order_id}</h2>
+            <p>Số tiền: <strong>{formatPrice(payosPayment.amount)}đ</strong></p>
+            <p>Trạng thái: <span className="status-badge pending">Chờ thanh toán</span></p>
+            {payosPayment.payos_checkout_url && (
+              <a
+                className="btn btn-primary"
+                href={payosPayment.payos_checkout_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Mở trang thanh toán PayOS
+              </a>
+            )}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleCheckPayosStatus}
+              disabled={checkingPayment}
+            >
+              {checkingPayment ? 'Đang kiểm tra...' : 'Tôi đã thanh toán'}
+            </button>
+            <Link to="/orders" className="checkout-back-link">Xem đơn hàng đang chờ</Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (!loading && items.length === 0) {
     return (
@@ -213,6 +322,31 @@ export default function CheckoutPage() {
                   className="form-input"
                   rows="2"
                 />
+              </div>
+              <div className="form-group">
+                <label>Phương thức thanh toán</label>
+                <div className="payment-methods">
+                  <label className={`payment-method-option ${paymentMethod === 'cod' ? 'selected' : ''}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={paymentMethod === 'cod'}
+                      onChange={handlePaymentMethodChange}
+                    />
+                    <span>Thanh toán khi nhận hàng</span>
+                  </label>
+                  <label className={`payment-method-option ${paymentMethod === 'bank_transfer' ? 'selected' : ''}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="bank_transfer"
+                      checked={paymentMethod === 'bank_transfer'}
+                      onChange={handlePaymentMethodChange}
+                    />
+                    <span>Chuyển khoản PayOS</span>
+                  </label>
+                </div>
               </div>
 
               <button

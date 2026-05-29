@@ -37,12 +37,30 @@ export const orderService = {
   },
 
   async updateStatus(id, status) {
+    const currentOrder = await this.findById(id);
+    if (!currentOrder) {
+      const error = new Error('Order not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (status === 'cancelled' && currentOrder.status !== 'cancelled') {
+      const [items] = await pool.query('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [id]);
+      if (items.length > 0) {
+        await productClient.syncStock(items.map((item) => ({
+          product_id: item.product_id,
+          quantity: -Number(item.quantity)
+        })));
+      }
+    }
+
     await pool.query('UPDATE orders SET status = ? WHERE id = ?', [status, id]);
     return this.findById(id);
   },
 
   async create(payload) {
-    const { user_id: userId, items = [] } = payload;
+    const { user_id: userId, items = [], payment_method: paymentMethod = 'cod' } = payload;
+    const normalizedPaymentMethod = paymentMethod === 'bank_transfer' ? 'bank_transfer' : 'cod';
     
     // 1. Fetch product details and check stock
     const detailedItems = await Promise.all(items.map(async (item) => {
@@ -89,8 +107,10 @@ export const orderService = {
           quantity: i.quantity 
         })));
         
-        // 4. Update status to confirmed if sync is successful
-        await this.updateStatus(orderId, 'confirmed');
+        if (normalizedPaymentMethod === 'cod') {
+          // COD orders are accepted immediately; bank transfer orders wait for PayOS confirmation.
+          await this.updateStatus(orderId, 'confirmed');
+        }
       } catch (syncError) {
         // SAGA: Compensating transaction if stock sync fails
         console.error('Stock sync failed, cancelling order:', syncError.message);
@@ -110,7 +130,9 @@ export const orderService = {
         await notificationClient.create({
           user_id: userId,
           title: 'Order created',
-          message: `Order #${orderId} has been created`,
+          message: normalizedPaymentMethod === 'bank_transfer'
+            ? `Order #${orderId} is waiting for bank transfer payment`
+            : `Order #${orderId} has been created`,
           type: 'order',
           email: user.email
         });
@@ -118,7 +140,12 @@ export const orderService = {
         console.warn(`Order notification skipped: ${error.message}`);
       }
 
-      return { id: orderId, user_id: userId, total_amount: total, items: detailedItems };
+      const order = await this.findById(orderId);
+      return {
+        ...order,
+        payment_method: normalizedPaymentMethod,
+        items: detailedItems
+      };
     } catch (error) {
       if (!committed) {
         await connection.rollback();

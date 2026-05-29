@@ -44,6 +44,12 @@ erDiagram
     decimal amount "DECIMAL(12,2), NOT NULL"
     enum method "cod, bank_transfer, momo, vnpay"
     enum status "pending, paid, failed, refunded"
+    bigint payos_order_code "UNIQUE"
+    varchar payos_payment_link_id "VARCHAR(100)"
+    varchar payos_checkout_url "VARCHAR(500)"
+    text payos_qr_code
+    varchar transaction_reference "VARCHAR(100)"
+    timestamp paid_at
     timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
     timestamp updated_at "ON UPDATE CURRENT_TIMESTAMP"
   }
