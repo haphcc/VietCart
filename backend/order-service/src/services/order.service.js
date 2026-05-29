@@ -15,10 +15,30 @@ export const orderService = {
     return rows[0] || null;
   },
 
+  async findItemsByOrderId(orderId) {
+    const [rows] = await pool.query(`
+      SELECT oi.*, p.name as product_name, p.image_url 
+      FROM order_items oi 
+      JOIN vietcart_product.products p ON oi.product_id = p.id
+      WHERE oi.order_id = ?
+    `, [orderId]);
+    return rows;
+  },
+
+  async updateStatus(id, status) {
+    await pool.query('UPDATE orders SET status = ? WHERE id = ?', [status, id]);
+    return this.findById(id);
+  },
+
   async create(payload) {
     const { user_id: userId, items = [] } = payload;
+    
+    // 1. Fetch product details and check stock
     const detailedItems = await Promise.all(items.map(async (item) => {
       const product = await productClient.getById(item.product_id);
+      if (product.stock < item.quantity) {
+        throw new Error(`Product "${product.name}" does not have enough stock.`);
+      }
       return {
         ...item,
         price: product.price,
@@ -29,23 +49,45 @@ export const orderService = {
 
     const connection = await pool.getConnection();
     let committed = false;
+    let orderId = null;
+    
     try {
       await connection.beginTransaction();
+      
+      // 2. Create order in pending state
       const [orderResult] = await connection.query(
         'INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, ?)',
         [userId, total, 'pending']
       );
+      orderId = orderResult.insertId;
 
       for (const item of detailedItems) {
         await connection.query(
           'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)',
-          [orderResult.insertId, item.product_id, item.quantity, item.price]
+          [orderId, item.product_id, item.quantity, item.price]
         );
       }
 
       await connection.commit();
       committed = true;
+      
+      // 3. Sync stock via Product Service
+      try {
+        await productClient.syncStock(detailedItems.map(i => ({ 
+          product_id: i.product_id, 
+          quantity: i.quantity 
+        })));
+        
+        // 4. Update status to confirmed if sync is successful
+        await this.updateStatus(orderId, 'confirmed');
+      } catch (syncError) {
+        // SAGA: Compensating transaction if stock sync fails
+        console.error('Stock sync failed, cancelling order:', syncError.message);
+        await this.updateStatus(orderId, 'cancelled');
+        throw new Error('Could not synchronize stock. Order has been cancelled.');
+      }
 
+      // Fail-safe cleanup and notification
       try {
         await cartClient.clearByUser(userId);
       } catch (error) {
@@ -57,7 +99,7 @@ export const orderService = {
         await notificationClient.create({
           user_id: userId,
           title: 'Order created',
-          message: `Order #${orderResult.insertId} has been created`,
+          message: `Order #${orderId} has been created`,
           type: 'order',
           email: user.email
         });
@@ -65,7 +107,7 @@ export const orderService = {
         console.warn(`Order notification skipped: ${error.message}`);
       }
 
-      return { id: orderResult.insertId, user_id: userId, total_amount: total, items: detailedItems };
+      return { id: orderId, user_id: userId, total_amount: total, items: detailedItems };
     } catch (error) {
       if (!committed) {
         await connection.rollback();

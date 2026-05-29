@@ -8,11 +8,33 @@ export const cartService = {
 
   async addItem(payload) {
     const { user_id: userId, product_id: productId, quantity } = payload;
-    const [result] = await pool.query(
-      'INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)',
+    await pool.query(
+      'INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?) ' +
+        'ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)',
       [userId, productId, quantity]
     );
-    return { id: result.insertId, ...payload };
+    const [rows] = await pool.query(
+      'SELECT * FROM cart_items WHERE user_id = ? AND product_id = ? LIMIT 1',
+      [userId, productId]
+    );
+    return rows[0];
+  },
+
+  async updateQuantity(userId, productId, quantity) {
+    if (quantity <= 0) {
+      await pool.query('DELETE FROM cart_items WHERE user_id = ? AND product_id = ?', [userId, productId]);
+      return null;
+    }
+
+    await pool.query(
+      'UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?',
+      [quantity, userId, productId]
+    );
+    const [rows] = await pool.query(
+      'SELECT * FROM cart_items WHERE user_id = ? AND product_id = ? LIMIT 1',
+      [userId, productId]
+    );
+    return rows[0];
   },
 
   async removeItem(itemId) {
