@@ -98,7 +98,7 @@ export default function ProductDetailPage() {
 
   const icon = product ? (productIcons[product.id] || '📦') : '📦';
   const inStock = product ? product.stock > 0 : false;
-  const showRealImg = product && product.image_url && !product.image_url.includes('example.com') && !imgError;
+  const showRealImg = product && product.image_url && !imgError;
 
   return (
     <section className="page-section">

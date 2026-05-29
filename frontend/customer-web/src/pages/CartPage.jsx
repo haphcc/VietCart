@@ -151,7 +151,7 @@ export default function CartPage() {
               <article key={item.id} className="cart-line-item">
                 <div className="cart-line-main">
                   <div className="cart-line-thumb">
-                    {item.image_url && !item.image_url.includes('example.com') ? (
+                    {item.image_url ? (
                       <img src={item.image_url} alt={item.name} />
                     ) : (
                       <span>📦</span>

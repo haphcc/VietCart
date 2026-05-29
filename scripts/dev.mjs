@@ -1,5 +1,4 @@
-import { spawn, spawnSync } from 'child_process';
-import { existsSync } from 'fs';
+import { spawn } from 'child_process';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import net from 'net';
@@ -8,9 +7,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 const isWindows = process.platform === 'win32';
 const npmCmd = isWindows ? 'npm.cmd' : 'npm';
-const mysqlCmd = isWindows && existsSync('C:\\xampp\\mysql\\bin\\mysql.exe')
-  ? 'C:\\xampp\\mysql\\bin\\mysql.exe'
-  : 'mysql';
 
 const services = [
   ['api-gateway', 'dev:api-gateway', 3000],
@@ -51,36 +47,6 @@ async function assertPortsAreFree() {
 }
 
 await assertPortsAreFree();
-
-function initializeDatabase() {
-  const result = spawnSync(mysqlCmd, [
-    '--protocol=TCP',
-    '-h',
-    '127.0.0.1',
-    '-P',
-    '3306',
-    '--default-character-set=utf8mb4',
-    '-u',
-    'root',
-    '-e',
-    'SOURCE database/init.sql;'
-  ], {
-    cwd: rootDir,
-    encoding: 'utf8',
-    shell: false
-  });
-
-  if (result.status !== 0) {
-    console.error('[dev] Could not initialize MySQL database.');
-    console.error('[dev] Start MySQL in XAMPP, then run npm run dev again.');
-    if (result.stderr) console.error(result.stderr.trim());
-    process.exit(result.status || 1);
-  }
-
-  console.log('[dev] Database is ready.');
-}
-
-initializeDatabase();
 
 const children = services.map(([name, script]) => {
   const child = spawn(npmCmd, ['run', script], {

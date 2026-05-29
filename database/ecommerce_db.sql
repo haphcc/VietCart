@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 INSERT INTO products (name, description, price, stock, image_url) VALUES
-('Ao thun VietCart', 'San pham demo cho Product Service', 129000, 50, 'https://example.com/product-1.jpg'),
-('Balo cong nghe', 'Balo di hoc va di lam', 349000, 25, 'https://example.com/product-2.jpg');
+('Ao thun VietCart', 'San pham demo cho Product Service', 129000, 50, '/images/products/product-1.jpg'),
+('Balo cong nghe', 'Balo di hoc va di lam', 349000, 25, '/images/products/product-2.jpg');
 
 USE vietcart_cart;
 CREATE TABLE IF NOT EXISTS cart_items (

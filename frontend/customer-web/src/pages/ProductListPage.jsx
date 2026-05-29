@@ -74,7 +74,22 @@ export default function ProductListPage() {
       {/* Toolbar: Search + Count */}
       <div className="product-toolbar">
         <div className="search-box">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon">
+            <svg
+              className="search-icon-svg"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </span>
           <input
             id="product-search"
             type="text"
@@ -118,7 +133,22 @@ export default function ProductListPage() {
       {/* No Results */}
       {!loading && !error && filtered.length === 0 && products.length > 0 && (
         <div className="no-results">
-          <span className="no-results-icon">🔎</span>
+          <span className="no-results-icon">
+            <svg
+              className="no-results-icon-svg"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </span>
           <h3>Không tìm thấy sản phẩm</h3>
           <p>Không có sản phẩm nào khớp với từ khóa "{search}". Hãy thử tìm kiếm với từ khóa khác.</p>
         </div>

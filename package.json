@@ -13,6 +13,7 @@
     "backend/user-service"
   ],
   "scripts": {
+    "db:init": "node scripts/db-init.mjs",
     "dev": "node scripts/dev.mjs",
     "dev:frontend": "npm run dev -w vietcart-customer-web",
     "build:frontend": "npm run build -w vietcart-customer-web",

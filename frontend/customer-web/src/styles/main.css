@@ -1124,6 +1124,20 @@ nav {
   color: var(--text-light);
   font-size: 1rem;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-icon-svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--text-light);
+  transition: stroke 0.2s ease;
+}
+
+.search-box:has(input:focus) .search-icon-svg {
+  stroke: var(--primary);
 }
 
 .search-box input {
@@ -1382,9 +1396,16 @@ nav {
 }
 
 .no-results .no-results-icon {
-  font-size: 3.5rem;
   margin-bottom: 16px;
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.no-results-icon-svg {
+  width: 56px;
+  height: 56px;
+  stroke: var(--text-light);
 }
 
 .no-results h3 {

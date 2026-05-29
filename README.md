@@ -37,13 +37,23 @@ VietCart là hệ thống thương mại điện tử trực tuyến dùng kiế
 npm install
 ```
 
-3. Chạy toàn bộ frontend và backend bằng một lệnh:
+3. Lần đầu chạy dự án, import database mẫu:
+
+```powershell
+npm run db:init
+```
+
+Lệnh này sẽ reset và seed lại dữ liệu từ `database/init.sql`. Chỉ chạy khi muốn tạo mới database hoặc đưa dữ liệu về trạng thái mẫu ban đầu.
+
+4. Chạy toàn bộ frontend và backend bằng một lệnh:
 
 ```powershell
 npm run dev
 ```
 
-Lệnh `npm run dev` sẽ tự import/cập nhật database từ `database/init.sql` trước khi start services. Nếu muốn import database thủ công:
+Lệnh `npm run dev` chỉ start frontend và backend, không reset database. Dữ liệu người dùng tạo khi test như tài khoản, mật khẩu đã đổi, giỏ hàng, đơn hàng sẽ được giữ lại sau mỗi lần chạy lại `npm run dev`.
+
+Nếu muốn import database thủ công:
 
 ```powershell
 & "C:\xampp\mysql\bin\mysql.exe" --protocol=TCP -h 127.0.0.1 -P 3306 --default-character-set=utf8mb4 -u root -e "SOURCE database/init.sql;"
@@ -65,6 +75,7 @@ Nếu muốn test gửi email thật, cấu hình `SMTP_HOST`, `SMTP_PORT`, `SMT
 ## Lệnh npm chính
 
 - `npm run dev`: chạy toàn bộ frontend và các backend service cùng lúc.
+- `npm run db:init`: reset và seed lại database từ `database/init.sql`.
 - `npm run dev:frontend`: chạy giao diện React/Vite.
 - `npm run build:frontend`: build frontend để kiểm tra lỗi trước khi nộp/chạy production.
 - `npm run dev:api-gateway`: chạy API Gateway.

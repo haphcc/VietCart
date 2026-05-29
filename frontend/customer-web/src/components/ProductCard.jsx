@@ -22,7 +22,7 @@ export default function ProductCard({ product }) {
     <Link to={`/products/${product.id}`} className="product-card" id={`product-card-${product.id}`}>
       {/* Ảnh sản phẩm */}
       <div className="product-card-img-wrapper">
-        {!imgError && product.image_url && !product.image_url.includes('example.com') ? (
+        {!imgError && product.image_url ? (
           <img
             src={product.image_url}
             alt={product.name}
