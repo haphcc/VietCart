@@ -17,6 +17,7 @@ erDiagram
     int quantity "NOT NULL, DEFAULT 1"
     timestamp created_at "DEFAULT CURRENT_TIMESTAMP"
     timestamp updated_at "ON UPDATE CURRENT_TIMESTAMP"
+    unique unique_user_product "user_id, product_id"
   }
 
   VIETCART_ORDER_ORDERS {
@@ -71,8 +72,16 @@ erDiagram
   }
 
   VIETCART_ORDER_ORDERS ||--o{ VIETCART_ORDER_ORDER_ITEMS : "fk_order_items_order"
+  VIETCART_USER_USERS ||--o{ VIETCART_CART_CART_ITEMS : "user_id logical"
+  VIETCART_PRODUCT_PRODUCTS ||--o{ VIETCART_CART_CART_ITEMS : "product_id logical"
+  VIETCART_USER_USERS ||--o{ VIETCART_ORDER_ORDERS : "user_id logical"
+  VIETCART_PRODUCT_PRODUCTS ||--o{ VIETCART_ORDER_ORDER_ITEMS : "product_id logical"
+  VIETCART_ORDER_ORDERS ||--o{ VIETCART_PAYMENT_PAYMENTS : "order_id logical"
+  VIETCART_USER_USERS ||--o{ VIETCART_NOTIFICATION_NOTIFICATIONS : "user_id logical"
 
   %% Microservices database-per-service notes:
+  %% - Tables checked against database/*.sql and backend SQL queries: products, cart_items, orders, order_items, payments, notifications, users.
+  %% - order_items.order_id is the only enforced foreign key in the SQL files.
   %% - cart_items.product_id stores Product Service product id but has no cross-database foreign key.
   %% - order_items.product_id stores Product Service product id but has no cross-database foreign key.
   %% - payments.order_id stores Order Service order id but has no cross-database foreign key.
