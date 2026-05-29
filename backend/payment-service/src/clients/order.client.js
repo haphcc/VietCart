@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { loadEnv } from '../../../shared/config/loadEnv.js';
+
+loadEnv();
 
 const baseURL = process.env.ORDER_SERVICE_URL || 'http://localhost:3003';
 

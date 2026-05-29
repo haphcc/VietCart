@@ -6,5 +6,6 @@ export const userApi = {
   login: (payload) => axiosClient.post('/users/login', payload),
   me: () => axiosClient.get('/users/me', { headers: getAuthHeaders() }),
   updateMe: (payload) => axiosClient.patch('/users/me', payload, { headers: getAuthHeaders() }),
-  getById: (id) => axiosClient.get(`/users/${id}`)
+  changePassword: (payload) => axiosClient.patch('/users/me/password', payload, { headers: getAuthHeaders() }),
+  getById: (id) => axiosClient.get(`/users/${id}`, { headers: getAuthHeaders() })
 };

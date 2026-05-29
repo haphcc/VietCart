@@ -46,3 +46,12 @@ export async function updateMe(req, res, next) {
     next(error);
   }
 }
+
+export async function changeMyPassword(req, res, next) {
+  try {
+    const result = await userService.changePassword(req.user.id, req.body);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+}

@@ -3,8 +3,9 @@ import dotenv from 'dotenv';
 import express from 'express';
 import morgan from 'morgan';
 import cartRoutes from './routes/cart.routes.js';
+import { loadEnv } from '../../shared/config/loadEnv.js';
 
-dotenv.config();
+loadEnv();
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -22,4 +23,3 @@ app.use('/cart', cartRoutes);
 app.listen(port, () => {
   console.log(`Cart Service running on port ${port}`);
 });
-

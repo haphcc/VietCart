@@ -49,11 +49,19 @@ export const notificationService = {
     };
   },
 
-  async markAsRead(id) {
-    const [result] = await pool.query('UPDATE notifications SET is_read = TRUE WHERE id = ?', [id]);
+  async markAsRead(id, actor) {
+    const params = actor?.role === 'admin' ? [id] : [id, actor?.id];
+    const ownerClause = actor?.role === 'admin' ? '' : ' AND user_id = ?';
+    const [result] = await pool.query(
+      `UPDATE notifications SET is_read = TRUE WHERE id = ?${ownerClause}`,
+      params
+    );
     if (result.affectedRows === 0) return null;
 
-    const [rows] = await pool.query('SELECT * FROM notifications WHERE id = ?', [id]);
+    const [rows] = await pool.query(
+      `SELECT * FROM notifications WHERE id = ?${ownerClause}`,
+      params
+    );
     return rows[0] || null;
   },
 
@@ -62,8 +70,10 @@ export const notificationService = {
     return { updated: result.affectedRows };
   },
 
-  async delete(id) {
-    const [result] = await pool.query('DELETE FROM notifications WHERE id = ?', [id]);
+  async delete(id, actor) {
+    const params = actor?.role === 'admin' ? [id] : [id, actor?.id];
+    const ownerClause = actor?.role === 'admin' ? '' : ' AND user_id = ?';
+    const [result] = await pool.query(`DELETE FROM notifications WHERE id = ?${ownerClause}`, params);
     return result.affectedRows > 0;
   }
 };

@@ -5,6 +5,13 @@ services:
       - "3000:3000"
     env_file:
       - ./backend/api-gateway/.env.example
+    environment:
+      PRODUCT_SERVICE_URL: http://product-service:3001
+      CART_SERVICE_URL: http://cart-service:3002
+      ORDER_SERVICE_URL: http://order-service:3003
+      PAYMENT_SERVICE_URL: http://payment-service:3004
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      USER_SERVICE_URL: http://user-service:3006
 
   product-service:
     build: ./backend/product-service
@@ -12,6 +19,8 @@ services:
       - "3001:3001"
     env_file:
       - ./backend/product-service/.env.example
+    environment:
+      DB_HOST: host.docker.internal
 
   cart-service:
     build: ./backend/cart-service
@@ -19,6 +28,8 @@ services:
       - "3002:3002"
     env_file:
       - ./backend/cart-service/.env.example
+    environment:
+      DB_HOST: host.docker.internal
 
   order-service:
     build: ./backend/order-service
@@ -26,6 +37,12 @@ services:
       - "3003:3003"
     env_file:
       - ./backend/order-service/.env.example
+    environment:
+      DB_HOST: host.docker.internal
+      PRODUCT_SERVICE_URL: http://product-service:3001
+      CART_SERVICE_URL: http://cart-service:3002
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      USER_SERVICE_URL: http://user-service:3006
 
   payment-service:
     build: ./backend/payment-service
@@ -33,6 +50,9 @@ services:
       - "3004:3004"
     env_file:
       - ./backend/payment-service/.env.example
+    environment:
+      DB_HOST: host.docker.internal
+      ORDER_SERVICE_URL: http://order-service:3003
 
   notification-service:
     build: ./backend/notification-service
@@ -40,6 +60,8 @@ services:
       - "3005:3005"
     env_file:
       - ./backend/notification-service/.env.example
+    environment:
+      DB_HOST: host.docker.internal
 
   user-service:
     build: ./backend/user-service
@@ -47,3 +69,6 @@ services:
       - "3006:3006"
     env_file:
       - ./backend/user-service/.env.example
+    environment:
+      DB_HOST: host.docker.internal
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005

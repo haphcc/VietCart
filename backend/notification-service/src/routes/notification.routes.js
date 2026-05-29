@@ -6,14 +6,15 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead
 } from '../controllers/notification.controller.js';
+import { authMiddleware, authorizeUserParam, requireInternalApiKey } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
-router.get('/user/:userId', getNotificationsByUser);
-router.patch('/user/:userId/read-all', markAllNotificationsAsRead);
-router.post('/', createNotification);
-router.patch('/:id/read', markNotificationAsRead);
-router.delete('/:id', deleteNotification);
+router.get('/user/:userId', authMiddleware, authorizeUserParam, getNotificationsByUser);
+router.patch('/user/:userId/read-all', authMiddleware, authorizeUserParam, markAllNotificationsAsRead);
+router.post('/', requireInternalApiKey, createNotification);
+router.patch('/:id/read', authMiddleware, markNotificationAsRead);
+router.delete('/:id', authMiddleware, deleteNotification);
 
 export default router;
 

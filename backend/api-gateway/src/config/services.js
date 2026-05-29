@@ -1,3 +1,7 @@
+import { loadEnv } from '../../../shared/config/loadEnv.js';
+
+loadEnv();
+
 export const services = {
   product: process.env.PRODUCT_SERVICE_URL || 'http://localhost:3001',
   cart: process.env.CART_SERVICE_URL || 'http://localhost:3002',

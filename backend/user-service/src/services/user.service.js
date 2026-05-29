@@ -113,6 +113,50 @@ export const userService = {
     );
 
     if (result.affectedRows === 0) throw createError(404, 'User not found');
-    return this.findById(id);
+
+    const user = await this.findById(id);
+    await notificationClient.create({
+      user_id: user.id,
+      title: 'Hồ sơ đã được cập nhật',
+      message: 'Thông tin hồ sơ VietCart của bạn vừa được cập nhật.',
+      type: 'system',
+      email: user.email
+    });
+
+    return user;
+  },
+
+  async changePassword(id, payload) {
+    const currentPassword = String(payload.current_password || '');
+    const newPassword = String(payload.new_password || '');
+    const confirmPassword = String(payload.confirm_password || '');
+
+    if (!currentPassword) throw createError(400, 'Mật khẩu hiện tại là bắt buộc');
+    if (newPassword.length < 6) throw createError(400, 'Mật khẩu mới phải có ít nhất 6 ký tự');
+    if (newPassword !== confirmPassword) throw createError(400, 'Xác nhận mật khẩu không khớp');
+
+    const [rows] = await pool.query(
+      'SELECT id, password_hash FROM users WHERE id = ? AND is_active = TRUE',
+      [id]
+    );
+    const user = rows[0];
+    if (!user) throw createError(404, 'Không tìm thấy người dùng');
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isMatch) throw createError(401, 'Mật khẩu hiện tại không đúng');
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, id]);
+
+    const publicUser = await this.findById(id);
+    await notificationClient.create({
+      user_id: publicUser.id,
+      title: 'Mật khẩu đã được đổi',
+      message: 'Mật khẩu đăng nhập VietCart của bạn vừa được cập nhật.',
+      type: 'system',
+      email: publicUser.email
+    });
+
+    return { message: 'Mật khẩu đã được cập nhật' };
   }
 };

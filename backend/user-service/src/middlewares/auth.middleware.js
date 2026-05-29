@@ -15,3 +15,11 @@ export function authMiddleware(req, res, next) {
     return res.status(401).json({ message: 'Invalid or expired token' });
   }
 }
+
+export function authorizeSelfOrAdmin(req, res, next) {
+  if (req.user?.role === 'admin' || Number(req.user?.id) === Number(req.params.id)) {
+    return next();
+  }
+
+  return res.status(403).json({ message: 'Forbidden' });
+}

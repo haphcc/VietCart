@@ -11,8 +11,9 @@ import productRoutes from './routes/product.routes.js';
 import userRoutes from './routes/user.routes.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import { rateLimitMiddleware } from './middlewares/rateLimit.middleware.js';
+import { loadEnv } from '../../shared/config/loadEnv.js';
 
-dotenv.config();
+loadEnv();
 
 const app = express();
 const port = process.env.PORT || 3000;

@@ -724,6 +724,17 @@ nav {
   white-space: nowrap;
 }
 
+.nav-user-link {
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+}
+
+.nav-user-link:hover,
+.nav-user-link.active {
+  color: var(--primary);
+  background-color: var(--primary-light);
+}
+
 .btn-small {
   min-height: 34px;
   padding: 7px 12px;
@@ -848,6 +859,16 @@ nav {
   padding: 10px 12px;
 }
 
+.form-success {
+  color: #047857;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px 12px;
+}
+
 .auth-submit {
   width: 100%;
 }
@@ -864,6 +885,35 @@ nav {
   gap: 20px;
   align-items: center;
   margin-bottom: 24px;
+}
+
+.profile-page {
+  max-width: 980px;
+}
+
+.profile-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-panel {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 460px);
+}
+
+.profile-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--text-muted);
+  border-bottom: 1px dashed var(--border);
+  margin-top: 18px;
+  padding-bottom: 10px;
+}
+
+.profile-summary strong {
+  color: var(--text-main);
+  text-align: right;
 }
 
 .notification-list {
@@ -887,6 +937,10 @@ nav {
 
 .notification-item.is-unread {
   border-left-color: var(--primary);
+}
+
+.notification-item.is-read {
+  background-color: #f8fafc;
 }
 
 .notification-main h3 {
@@ -922,6 +976,24 @@ nav {
   font-weight: 800;
   padding: 3px 8px;
   text-transform: uppercase;
+}
+
+.read-status {
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  text-transform: uppercase;
+}
+
+.read-status.unread {
+  color: #047857;
+  background-color: #ecfdf5;
+}
+
+.read-status.read {
+  color: var(--text-muted);
+  background-color: var(--secondary-light);
 }
 
 .unread-dot {

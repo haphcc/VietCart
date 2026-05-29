@@ -1,79 +1,78 @@
 # VietCart
 
-VietCart la he thong thuong mai dien tu truc tuyen dung kien truc Microservices cho bao cao mon Kien truc phan mem.
+VietCart là hệ thống thương mại điện tử trực tuyến dùng kiến trúc Microservices cho báo cáo môn Kiến trúc phần mềm.
 
-## Cong nghe
+## Công nghệ
 
 - Frontend: ReactJS + Vite
 - Backend: Node.js + ExpressJS
 - Database: MySQL qua XAMPP
-- Kien truc: Microservices + API Gateway
+- Kiến trúc: Microservices + API Gateway
 
-## Phan cong theo cau hoi
+## Phân công theo câu hỏi
 
-- Cau 1, Cau 2: Chuong I & II, mo hinh kien truc Microservices, so do, viet dac ta kien truc, thiet lap API Gateway, cau truc thu muc, routing va thiet ke CSDL ket noi.
-- Cau 3: Chuong III, cache/queue va Cart Service.
-- Cau 4: Chuong IV, dong bo du lieu va Product Service, Order Service.
-- Cau 5: Chuong V, kiem thu load test va tong hop ket qua.
-- Tong hop: User Service/Notification Service, muc luc, phu luc, tai lieu tham khao.
+- Câu 1, Câu 2: Chương I & II, mô hình kiến trúc Microservices, sơ đồ, viết đặc tả kiến trúc, thiết lập API Gateway, cấu trúc thư mục, routing và thiết kế CSDL kết nối.
+- Câu 3: Chương III, cache/queue và Cart Service.
+- Câu 4: Chương IV, đồng bộ dữ liệu và Product Service, Order Service.
+- Câu 5: Chương V, kiểm thử load test và tổng hợp kết quả.
+- Tổng hợp: User Service/Notification Service, mục lục, phụ lục, tài liệu tham khảo.
 
-## Cau truc chinh
+## Cấu trúc chính
 
-- `frontend/customer-web`: ung dung ReactJS cho khach hang.
-- `backend/api-gateway`: cong vao duy nhat cho frontend, dieu phoi request den cac service.
-- `backend/*-service`: cac microservice doc lap.
-- `backend/user-service`: dang ky, dang nhap, cap JWT va tra thong tin nguoi dung.
-- `backend/notification-service`: luu thong bao, danh dau da doc va gui email neu co SMTP.
-- `database`: script tao database/table cho MySQL.
-- `shared`: hang so va tien ich dung chung.
-- `docs`: noi viet noi dung bao cao va so do kien truc.
+- `frontend/customer-web`: ứng dụng ReactJS cho khách hàng.
+- `backend/api-gateway`: cổng vào duy nhất cho frontend, điều phối request đến các service.
+- `backend/*-service`: các microservice độc lập.
+- `backend/user-service`: đăng ký, đăng nhập, cấp JWT và trả thông tin người dùng.
+- `backend/notification-service`: lưu thông báo, đánh dấu đã đọc và gửi email nếu có SMTP.
+- `database`: script tạo database/table cho MySQL.
+- `shared`: hằng số và tiện ích dùng chung.
+- `docs`: nơi viết nội dung báo cáo và sơ đồ kiến trúc.
 
-## Chay nhanh
+## Chạy nhanh
 
-1. Cai Node.js va bat MySQL trong XAMPP.
-2. Import database mot lan neu chua co du lieu:
-
-```powershell
-& "C:\xampp\mysql\bin\mysql.exe" --default-character-set=utf8mb4 -u root -e "SOURCE database/product-service.sql; SOURCE database/cart-service.sql; SOURCE database/order-service.sql; SOURCE database/payment-service.sql; SOURCE database/notification-service.sql; SOURCE database/user-service.sql;"
-```
-
-3. Copy cac file `.env.example` thanh `.env` trong tung service can chay neu can doi cau hinh mac dinh.
-4. Cai dependency tu thu muc goc:
+1. Cài Node.js và bật MySQL trong XAMPP.
+2. Cài dependency từ thư mục gốc:
 
 ```powershell
 npm install
 ```
 
-5. Chay toan bo frontend va backend bang mot lenh:
+3. Chạy toàn bộ frontend và backend bằng một lệnh:
 
 ```powershell
 npm run dev
 ```
 
-Mo trinh duyet tai `http://127.0.0.1:5173/` hoac URL Vite in ra trong terminal. Nhan `Ctrl + C` de dung tat ca service.
+Lệnh `npm run dev` sẽ tự import/cập nhật database từ `database/init.sql` trước khi start services. Nếu muốn import database thủ công:
 
-Neu lenh bao port dang duoc su dung, hay dung cac terminal dang chay truoc do bang `Ctrl + C` roi chay lai `npm run dev`.
+```powershell
+& "C:\xampp\mysql\bin\mysql.exe" --protocol=TCP -h 127.0.0.1 -P 3306 --default-character-set=utf8mb4 -u root -e "SOURCE database/init.sql;"
+```
 
-Tai khoan demo sau khi import database:
+Không cần copy `.env.example` thành `.env` để chạy mặc định. Backend sẽ tự đọc `.env` nếu có, nếu không có thì dùng `.env.example`. Chỉ tạo `.env` khi muốn cấu hình riêng trên máy cá nhân, ví dụ SMTP Gmail.
+
+Mở trình duyệt tại `http://127.0.0.1:5173/` hoặc URL Vite in ra trong terminal. Nhấn `Ctrl + C` để dừng tất cả service.
+
+Nếu lệnh báo port đang được sử dụng, hãy dừng các terminal đang chạy trước đó bằng `Ctrl + C` rồi chạy lại `npm run dev`.
+
+Tài khoản demo sau khi import database:
 
 - Email: `demo@vietcart.local`
-- Mat khau: `123456`
+- Mật khẩu: `123456`
 
-Neu muon test gui email that, cau hinh `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` trong `backend/notification-service/.env`. Neu chua cau hinh SMTP, notification van duoc luu va email se co trang thai `skipped`.
+Nếu muốn test gửi email thật, cấu hình `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` trong `backend/notification-service/.env`. Không commit mật khẩu email vào `.env.example`. Nếu chưa cấu hình SMTP, notification vẫn được lưu và email sẽ có trạng thái `skipped`.
 
-## Lenh npm chinh
+## Lệnh npm chính
 
-- `npm run dev`: chay toan bo frontend va cac backend service cung luc.
-- `npm run dev:frontend`: chay giao dien React/Vite.
-- `npm run build:frontend`: build frontend de kiem tra loi truoc khi nop/chay production.
-- `npm run dev:api-gateway`: chay API Gateway.
-- `npm run dev:notification-service`: chay Notification Service.
-- `npm run dev:user-service`: chay User Service.
-- `npm run dev:<ten-service>`: chay rieng tung service backend, vi du `dev:product-service`.
+- `npm run dev`: chạy toàn bộ frontend và các backend service cùng lúc.
+- `npm run dev:frontend`: chạy giao diện React/Vite.
+- `npm run build:frontend`: build frontend để kiểm tra lỗi trước khi nộp/chạy production.
+- `npm run dev:api-gateway`: chạy API Gateway.
+- `npm run dev:notification-service`: chạy Notification Service.
+- `npm run dev:user-service`: chạy User Service.
+- `npm run dev:<ten-service>`: chạy riêng từng service backend, ví dụ `dev:product-service`.
 
-
-
-Neu muon chay truc tiep trong tung thu muc van duoc:
+Nếu muốn chạy trực tiếp trong từng thư mục vẫn được:
 
 ```powershell
 cd frontend/customer-web

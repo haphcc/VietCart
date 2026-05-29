@@ -1,4 +1,7 @@
 import nodemailer from 'nodemailer';
+import { loadEnv } from '../../../shared/config/loadEnv.js';
+
+loadEnv();
 
 function isSmtpConfigured() {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);

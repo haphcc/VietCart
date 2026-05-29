@@ -30,7 +30,7 @@ export default function NotificationPage() {
         if (!cancelled) setNotifications(Array.isArray(response.data) ? response.data : []);
       } catch (requestError) {
         if (!cancelled) {
-          setError(requestError.response?.data?.message || 'Khong the tai danh sach thong bao.');
+          setError(requestError.response?.data?.message || 'Không thể tải danh sách thông báo.');
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -62,10 +62,10 @@ export default function NotificationPage() {
     return (
       <section className="page-section notification-page">
         <div className="empty-state">
-          <p className="section-kicker">Thong bao ca nhan</p>
-          <h1>Can dang nhap</h1>
-          <p>Dang nhap bang User Service de xem thong bao va email gan voi tai khoan cua ban.</p>
-          <Link to="/login" className="btn btn-primary">Dang nhap</Link>
+          <p className="section-kicker">Thông báo cá nhân</p>
+          <h1>Cần đăng nhập</h1>
+          <p>Đăng nhập bằng User Service để xem thông báo và email gắn với tài khoản của bạn.</p>
+          <Link to="/login" className="btn btn-primary">Đăng nhập</Link>
         </div>
       </section>
     );
@@ -76,9 +76,9 @@ export default function NotificationPage() {
       <div className="page-heading-row">
         <div>
           <p className="section-kicker">Notification Service</p>
-          <h1>Thong bao cua {auth.user.name || auth.user.email}</h1>
+          <h1>Thông báo của {auth.user.name || auth.user.email}</h1>
           <p className="page-subtitle">
-            {unreadCount > 0 ? `${unreadCount} thong bao chua doc` : 'Tat ca thong bao da duoc doc'}
+            {unreadCount > 0 ? `${unreadCount} thông báo chưa đọc` : 'Tất cả thông báo đã được đọc'}
           </p>
         </div>
         <button
@@ -87,17 +87,17 @@ export default function NotificationPage() {
           onClick={markAllRead}
           disabled={unreadCount === 0 || loading}
         >
-          Doc tat ca
+          Đọc tất cả
         </button>
       </div>
 
-      {loading && <div className="status-box">Dang tai thong bao...</div>}
+      {loading && <div className="status-box">Đang tải thông báo...</div>}
       {error && <div className="status-box error">{error}</div>}
 
       {!loading && !error && notifications.length === 0 && (
         <div className="empty-state">
-          <h2>Chua co thong bao</h2>
-          <p>Cac thong bao don hang, thanh toan va he thong se hien thi tai day.</p>
+          <h2>Chưa có thông báo</h2>
+          <p>Các thông báo đơn hàng, thanh toán và hệ thống sẽ hiển thị tại đây.</p>
         </div>
       )}
 

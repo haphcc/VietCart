@@ -3,8 +3,9 @@ import dotenv from 'dotenv';
 import express from 'express';
 import morgan from 'morgan';
 import orderRoutes from './routes/order.routes.js';
+import { loadEnv } from '../../shared/config/loadEnv.js';
 
-dotenv.config();
+loadEnv();
 
 const app = express();
 const port = process.env.PORT || 3003;
@@ -22,4 +23,3 @@ app.use('/orders', orderRoutes);
 app.listen(port, () => {
   console.log(`Order Service running on port ${port}`);
 });
-

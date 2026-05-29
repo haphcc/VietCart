@@ -35,39 +35,44 @@ export default function Header() {
           className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
           end
         >
-          Trang chu
+          Trang chủ
         </NavLink>
         <NavLink
           to="/products"
           className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
         >
-          San pham
+          Sản phẩm
         </NavLink>
         <NavLink
           to="/cart"
           className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
         >
-          Gio hang
+          Giỏ hàng
         </NavLink>
         <NavLink
           to="/orders"
           className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
         >
-          Don hang
+          Đơn hàng
         </NavLink>
         <NavLink
           to="/notifications"
           className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
         >
-          Thong bao
+          Thông báo
         </NavLink>
       </nav>
       <div className="header-auth">
         {auth?.user ? (
           <>
-            <span className="nav-user">{auth.user.name || auth.user.email}</span>
+            <NavLink
+              to="/profile"
+              className={({ isActive }) => isActive ? 'nav-user nav-user-link active' : 'nav-user nav-user-link'}
+            >
+              {auth.user.name || auth.user.email}
+            </NavLink>
             <button type="button" className="btn btn-secondary btn-small" onClick={handleLogout}>
-              Dang xuat
+              Đăng xuất
             </button>
           </>
         ) : (
@@ -75,7 +80,7 @@ export default function Header() {
             to="/login"
             className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
           >
-            Dang nhap
+            Đăng nhập
           </NavLink>
         )}
       </div>

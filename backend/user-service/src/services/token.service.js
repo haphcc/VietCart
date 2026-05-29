@@ -1,7 +1,14 @@
 import jwt from 'jsonwebtoken';
+import { loadEnv } from '../../../shared/config/loadEnv.js';
 
-const secret = process.env.JWT_SECRET || 'vietcart_dev_secret';
+loadEnv();
+
+const secret = process.env.JWT_SECRET;
 const expiresIn = process.env.JWT_EXPIRES_IN || '1d';
+
+if (!secret) {
+  throw new Error('JWT_SECRET is required');
+}
 
 export function signUserToken(user) {
   return jwt.sign(

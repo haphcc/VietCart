@@ -3,8 +3,9 @@ import dotenv from 'dotenv';
 import express from 'express';
 import morgan from 'morgan';
 import paymentRoutes from './routes/payment.routes.js';
+import { loadEnv } from '../../shared/config/loadEnv.js';
 
-dotenv.config();
+loadEnv();
 
 const app = express();
 const port = process.env.PORT || 3004;
@@ -22,4 +23,3 @@ app.use('/payments', paymentRoutes);
 app.listen(port, () => {
   console.log(`Payment Service running on port ${port}`);
 });
-

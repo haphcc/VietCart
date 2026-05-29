@@ -9,10 +9,13 @@ export default function NotificationItem({ notification, onMarkRead, onDelete })
       <div className="notification-main">
         <div className="notification-title-row">
           <span className="notification-type">{notification?.type || 'system'}</span>
-          {!isRead && <span className="unread-dot" aria-label="Unread"></span>}
+          <span className={`read-status ${isRead ? 'read' : 'unread'}`}>
+            {isRead ? 'Đã đọc' : 'Chưa đọc'}
+          </span>
+          {!isRead && <span className="unread-dot" aria-label="Chưa đọc"></span>}
         </div>
-        <h3>{notification?.title || 'Thong bao'}</h3>
-        <p>{notification?.message || 'Noi dung thong bao'}</p>
+        <h3>{notification?.title || 'Thông báo'}</h3>
+        <p>{notification?.message || 'Nội dung thông báo'}</p>
         {createdAt && <time>{createdAt}</time>}
       </div>
 
@@ -23,14 +26,14 @@ export default function NotificationItem({ notification, onMarkRead, onDelete })
           onClick={() => onMarkRead(notification.id)}
           disabled={isRead}
         >
-          Da doc
+          Đánh dấu đã đọc
         </button>
         <button
           type="button"
           className="btn btn-secondary btn-small danger"
           onClick={() => onDelete(notification.id)}
         >
-          Xoa
+          Xóa
         </button>
       </div>
     </article>

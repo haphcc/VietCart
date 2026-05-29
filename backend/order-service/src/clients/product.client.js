@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { loadEnv } from '../../../shared/config/loadEnv.js';
+
+loadEnv();
 
 const baseURL = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3001';
 
@@ -8,4 +11,3 @@ export const productClient = {
     return response.data;
   }
 };
-
