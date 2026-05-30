@@ -45,3 +45,45 @@ export async function syncStock(req, res, next) {
   }
 }
 
+export async function reserveStock(req, res, next) {
+  try {
+    const { items, order_id: orderId } = req.body;
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Invalid items array' });
+    }
+    const result = await productService.reserveStock(items, orderId || null);
+    res.json(result);
+  } catch (error) {
+    if (error.message.includes('not found') || error.message.includes('not have enough stock')) {
+      return res.status(400).json({ message: error.message });
+    }
+    next(error);
+  }
+}
+
+export async function confirmReservation(req, res, next) {
+  try {
+    const { reservation_ids: reservationIds } = req.body;
+    if (!reservationIds || !Array.isArray(reservationIds) || reservationIds.length === 0) {
+      return res.status(400).json({ message: 'Invalid reservation_ids array' });
+    }
+    const result = await productService.confirmReservation(reservationIds);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function releaseReservation(req, res, next) {
+  try {
+    const { reservation_ids: reservationIds } = req.body;
+    if (!reservationIds || !Array.isArray(reservationIds) || reservationIds.length === 0) {
+      return res.status(400).json({ message: 'Invalid reservation_ids array' });
+    }
+    const result = await productService.releaseReservation(reservationIds);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+

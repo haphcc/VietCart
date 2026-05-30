@@ -45,12 +45,31 @@ export const orderService = {
     }
 
     if (status === 'cancelled' && currentOrder.status !== 'cancelled') {
-      const [items] = await pool.query('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [id]);
-      if (items.length > 0) {
-        await productClient.syncStock(items.map((item) => ({
-          product_id: item.product_id,
-          quantity: -Number(item.quantity)
-        })));
+      // Try to release reservation first (for orders that used reservation flow)
+      if (currentOrder.reservation_id) {
+        try {
+          const reservationIds = JSON.parse(currentOrder.reservation_id);
+          await productClient.releaseReservation(reservationIds);
+        } catch (releaseError) {
+          console.warn(`Reservation release failed, falling back to syncStock: ${releaseError.message}`);
+          // Fallback: use syncStock with negative quantities for backwards compatibility
+          const [items] = await pool.query('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [id]);
+          if (items.length > 0) {
+            await productClient.syncStock(items.map((item) => ({
+              product_id: item.product_id,
+              quantity: -Number(item.quantity)
+            })));
+          }
+        }
+      } else {
+        // Legacy orders without reservation_id
+        const [items] = await pool.query('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [id]);
+        if (items.length > 0) {
+          await productClient.syncStock(items.map((item) => ({
+            product_id: item.product_id,
+            quantity: -Number(item.quantity)
+          })));
+        }
       }
     }
 
@@ -62,17 +81,23 @@ export const orderService = {
     const { user_id: userId, items = [], payment_method: paymentMethod = 'cod' } = payload;
     const normalizedPaymentMethod = paymentMethod === 'bank_transfer' ? 'bank_transfer' : 'cod';
     
-    // 1. Fetch product details and check stock
-    const detailedItems = await Promise.all(items.map(async (item) => {
-      const product = await productClient.getById(item.product_id);
-      if (product.stock < item.quantity) {
-        throw new Error(`Product "${product.name}" does not have enough stock.`);
-      }
-      return {
-        ...item,
-        price: product.price,
-        subtotal: Number(product.price) * Number(item.quantity)
-      };
+    // Step 1: Reserve stock via Product Service (atomic check + hold)
+    // This replaces the old check-then-act pattern that caused race conditions
+    let reservation;
+    try {
+      reservation = await productClient.reserveStock(items);
+    } catch (reserveError) {
+      const message = reserveError.response?.data?.message || reserveError.message;
+      throw new Error(message);
+    }
+
+    const { reservationIds, reservedItems } = reservation;
+
+    // Calculate total from reserved items (prices come from Product Service)
+    const detailedItems = items.map((item, index) => ({
+      ...item,
+      price: reservedItems[index].price,
+      subtotal: Number(reservedItems[index].price) * Number(item.quantity)
     }));
     const total = detailedItems.reduce((sum, item) => sum + item.subtotal, 0);
 
@@ -83,10 +108,10 @@ export const orderService = {
     try {
       await connection.beginTransaction();
       
-      // 2. Create order in pending state
+      // Step 2: Create order with reservation_id reference
       const [orderResult] = await connection.query(
-        'INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, ?)',
-        [userId, total, 'pending']
+        'INSERT INTO orders (user_id, total_amount, status, reservation_id) VALUES (?, ?, ?, ?)',
+        [userId, total, 'pending', JSON.stringify(reservationIds)]
       );
       orderId = orderResult.insertId;
 
@@ -100,23 +125,20 @@ export const orderService = {
       await connection.commit();
       committed = true;
       
-      // 3. Sync stock via Product Service
-      try {
-        await productClient.syncStock(detailedItems.map(i => ({ 
-          product_id: i.product_id, 
-          quantity: i.quantity 
-        })));
-        
-        if (normalizedPaymentMethod === 'cod') {
-          // COD orders are accepted immediately; bank transfer orders wait for PayOS confirmation.
-          await this.updateStatus(orderId, 'confirmed');
-        }
-      } catch (syncError) {
-        // SAGA: Compensating transaction if stock sync fails
-        console.error('Stock sync failed, cancelling order:', syncError.message);
-        await this.updateStatus(orderId, 'cancelled');
-        throw new Error('Could not synchronize stock. Order has been cancelled.');
+      // Step 3: Emit event to Message Queue for async stock confirmation
+      const { eventBus } = await import('../events/eventBus.js');
+      
+      if (normalizedPaymentMethod === 'cod') {
+        // COD: Confirm stock immediately via event
+        eventBus.publish('order.created', {
+          orderId,
+          userId,
+          reservationIds,
+          items: detailedItems,
+          paymentMethod: normalizedPaymentMethod
+        });
       }
+      // bank_transfer: Stock stays reserved until payment is confirmed
 
       // Fail-safe cleanup and notification
       try {
@@ -149,6 +171,12 @@ export const orderService = {
     } catch (error) {
       if (!committed) {
         await connection.rollback();
+      }
+      // Saga: If order creation fails, release the reservation
+      try {
+        await productClient.releaseReservation(reservationIds);
+      } catch (releaseError) {
+        console.error('Failed to release reservation after order creation failure:', releaseError.message);
       }
       throw error;
     } finally {

@@ -14,5 +14,20 @@ export const productClient = {
   async syncStock(items) {
     const response = await axios.post(`${baseURL}/products/sync-stock`, { items });
     return response.data;
+  },
+
+  async reserveStock(items, orderId = null) {
+    const response = await axios.post(`${baseURL}/products/reserve-stock`, { items, order_id: orderId });
+    return response.data;
+  },
+
+  async confirmReservation(reservationIds) {
+    const response = await axios.post(`${baseURL}/products/confirm-reservation`, { reservation_ids: reservationIds });
+    return response.data;
+  },
+
+  async releaseReservation(reservationIds) {
+    const response = await axios.post(`${baseURL}/products/release-reservation`, { reservation_ids: reservationIds });
+    return response.data;
   }
 };

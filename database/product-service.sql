@@ -35,3 +35,16 @@ INSERT INTO products (id, name, description, price, stock, image_url) VALUES
 (18, 'Loa bluetooth mini', 'Loa nhỏ gọn, âm bass tốt, chống nước nhẹ', 399000, 24, '/images/products/product-18.jpg'),
 (19, 'Ổ cắm điện đa năng', 'Ổ cắm có cổng USB, bảo vệ quá tải', 329000, 20, '/images/products/product-19.jpg'),
 (20, 'Thẻ nhớ 128GB', 'Thẻ nhớ tốc độ cao cho điện thoại và máy ảnh', 289000, 38, '/images/products/product-20.jpg');
+
+-- Stock Reservation table for temporary stock holding
+CREATE TABLE IF NOT EXISTS stock_reservations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  product_id INT NOT NULL,
+  quantity INT NOT NULL,
+  order_id INT DEFAULT NULL,
+  status ENUM('reserved', 'confirmed', 'released') DEFAULT 'reserved',
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(id)
+);

@@ -4,6 +4,7 @@ import express from 'express';
 import morgan from 'morgan';
 import orderRoutes from './routes/order.routes.js';
 import { loadEnv } from '../../shared/config/loadEnv.js';
+import { registerOrderEventHandlers } from './events/orderEventHandlers.js';
 
 loadEnv();
 
@@ -22,4 +23,6 @@ app.use('/orders', orderRoutes);
 
 app.listen(port, () => {
   console.log(`Order Service running on port ${port}`);
+  registerOrderEventHandlers();
+  console.log('Event-driven message queue initialized');
 });

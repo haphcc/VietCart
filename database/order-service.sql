@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS orders (
   user_id INT NOT NULL,
   total_amount DECIMAL(12, 2) NOT NULL,
   status ENUM('pending', 'confirmed', 'shipping', 'completed', 'cancelled') NOT NULL DEFAULT 'pending',
+  reservation_id VARCHAR(500) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
