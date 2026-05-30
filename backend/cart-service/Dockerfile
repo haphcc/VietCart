@@ -1,8 +1,9 @@
 FROM node:22-alpine
 WORKDIR /app
-COPY package*.json ./
+COPY cart-service/package*.json ./
 RUN npm install
-COPY . .
+RUN ln -s /app/node_modules /node_modules
+COPY cart-service/ ./
+COPY shared /shared
 EXPOSE 3002
 CMD ["npm", "start"]
-
