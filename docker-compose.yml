@@ -1,4 +1,9 @@
 services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
   api-gateway:
     build: ./backend/api-gateway
     ports:
@@ -8,10 +13,12 @@ services:
     environment:
       PRODUCT_SERVICE_URL: http://product-service:3001
       CART_SERVICE_URL: http://cart-service:3002
-      ORDER_SERVICE_URL: http://order-service:3003
+      ORDER_SERVICE_URL: http://order-lb:3003
       PAYMENT_SERVICE_URL: http://payment-service:3004
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       USER_SERVICE_URL: http://user-service:3006
+    depends_on:
+      - order-lb
 
   product-service:
     build: ./backend/product-service
@@ -30,19 +37,62 @@ services:
       - ./backend/cart-service/.env.example
     environment:
       DB_HOST: host.docker.internal
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
 
-  order-service:
-    build: ./backend/order-service
+  order-lb:
+    image: nginx:1.27-alpine
     ports:
       - "3003:3003"
+    volumes:
+      - ./backend/order-lb/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - order-service-1
+      - order-service-2
+      - order-service-3
+
+  order-service-1:
+    build: ./backend/order-service
     env_file:
       - ./backend/order-service/.env.example
     environment:
       DB_HOST: host.docker.internal
+      REDIS_URL: redis://redis:6379
       PRODUCT_SERVICE_URL: http://product-service:3001
       CART_SERVICE_URL: http://cart-service:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       USER_SERVICE_URL: http://user-service:3006
+    depends_on:
+      - redis
+
+  order-service-2:
+    build: ./backend/order-service
+    env_file:
+      - ./backend/order-service/.env.example
+    environment:
+      DB_HOST: host.docker.internal
+      REDIS_URL: redis://redis:6379
+      PRODUCT_SERVICE_URL: http://product-service:3001
+      CART_SERVICE_URL: http://cart-service:3002
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      USER_SERVICE_URL: http://user-service:3006
+    depends_on:
+      - redis
+
+  order-service-3:
+    build: ./backend/order-service
+    env_file:
+      - ./backend/order-service/.env.example
+    environment:
+      DB_HOST: host.docker.internal
+      REDIS_URL: redis://redis:6379
+      PRODUCT_SERVICE_URL: http://product-service:3001
+      CART_SERVICE_URL: http://cart-service:3002
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      USER_SERVICE_URL: http://user-service:3006
+    depends_on:
+      - redis
 
   payment-service:
     build: ./backend/payment-service
@@ -52,7 +102,9 @@ services:
       - ./backend/payment-service/.env.example
     environment:
       DB_HOST: host.docker.internal
-      ORDER_SERVICE_URL: http://order-service:3003
+      ORDER_SERVICE_URL: http://order-lb:3003
+    depends_on:
+      - order-lb
 
   notification-service:
     build: ./backend/notification-service

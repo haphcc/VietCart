@@ -3,32 +3,92 @@ import { cartClient } from '../clients/cart.client.js';
 import { notificationClient } from '../clients/notification.client.js';
 import { productClient } from '../clients/product.client.js';
 import { userClient } from '../clients/user.client.js';
+import { orderCache } from '../utils/cache.js';
+
+const ORDER_STATUSES = new Set(['pending', 'confirmed', 'shipping', 'completed', 'cancelled']);
+const PAYMENT_METHODS = new Set(['cod', 'bank_transfer', 'momo', 'vnpay']);
+
+function createError(statusCode, message) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
+
+function normalizePaymentMethod(method) {
+  return PAYMENT_METHODS.has(method) ? method : 'cod';
+}
+
+function normalizeShippingInfo(info = {}) {
+  return {
+    name: (info.fullName || info.name || '').trim() || null,
+    phone: (info.phone || '').trim() || null,
+    address: (info.address || '').trim() || null,
+    note: (info.notes || info.note || '').trim() || null
+  };
+}
 
 export const orderService = {
   async findByUser(userId) {
-    const [rows] = await pool.query('SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC', [userId]);
+    const cacheKey = orderCache.keys.userOrders(userId);
+    const cached = await orderCache.get(cacheKey);
+    if (cached) return cached;
+
+    const [rows] = await pool.query(
+      `SELECT
+        o.*,
+        COUNT(oi.id) AS item_count
+       FROM orders o
+       LEFT JOIN order_items oi ON oi.order_id = o.id
+       WHERE o.user_id = ?
+       GROUP BY o.id
+       ORDER BY o.id DESC`,
+      [userId]
+    );
+    await orderCache.set(cacheKey, rows);
     return rows;
   },
 
-  async findById(id) {
+  async findById(id, { includeItems = true } = {}) {
+    const cacheKey = includeItems ? orderCache.keys.orderDetail(id) : null;
+    const cached = cacheKey ? await orderCache.get(cacheKey) : null;
+    if (cached) return cached;
+
     const [rows] = await pool.query('SELECT * FROM orders WHERE id = ?', [id]);
-    return rows[0] || null;
+    const order = rows[0] || null;
+    if (!order || !includeItems) return order;
+
+    const items = await this.findItemsByOrderId(id);
+    const detailedOrder = {
+      ...order,
+      item_count: items.length,
+      items
+    };
+    await orderCache.set(cacheKey, detailedOrder);
+    return detailedOrder;
   },
 
   async findItemsByOrderId(orderId) {
-    const [items] = await pool.query('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
+    const [items] = await pool.query('SELECT * FROM order_items WHERE order_id = ? ORDER BY id ASC', [orderId]);
     return Promise.all(items.map(async (item) => {
+      const normalizedItem = {
+        ...item,
+        quantity: Number(item.quantity),
+        price: Number(item.price),
+        subtotal: Number(item.price) * Number(item.quantity)
+      };
+
       try {
         const product = await productClient.getById(item.product_id);
         return {
-          ...item,
+          ...normalizedItem,
           product_name: product.name,
-          image_url: product.image_url
+          image_url: product.image_url,
+          product_description: product.description
         };
       } catch (error) {
         console.warn(`Product detail lookup skipped for product ${item.product_id}: ${error.message}`);
         return {
-          ...item,
+          ...normalizedItem,
           product_name: `Product #${item.product_id}`,
           image_url: null
         };
@@ -37,14 +97,32 @@ export const orderService = {
   },
 
   async updateStatus(id, status) {
-    const currentOrder = await this.findById(id);
-    if (!currentOrder) {
-      const error = new Error('Order not found');
-      error.statusCode = 404;
-      throw error;
+    if (!ORDER_STATUSES.has(status)) {
+      throw createError(400, 'Invalid order status');
     }
 
-    if (status === 'cancelled' && currentOrder.status !== 'cancelled') {
+    const currentOrder = await this.findById(id, { includeItems: false });
+    if (!currentOrder) {
+      throw createError(404, 'Order not found');
+    }
+
+    if (status === 'cancelled') {
+      const [result] = await pool.query(
+        'UPDATE orders SET status = ? WHERE id = ? AND status <> ?',
+        [status, id, 'cancelled']
+      );
+
+      if (result.affectedRows > 0) {
+        await orderCache.del([
+          orderCache.keys.orderDetail(id),
+          orderCache.keys.userOrders(currentOrder.user_id)
+        ]);
+      }
+
+      if (result.affectedRows === 0) {
+        return this.findById(id);
+      }
+
       const [items] = await pool.query('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [id]);
       if (items.length > 0) {
         await productClient.syncStock(items.map((item) => ({
@@ -52,18 +130,37 @@ export const orderService = {
           quantity: -Number(item.quantity)
         })));
       }
+
+      return this.findById(id);
     }
 
     await pool.query('UPDATE orders SET status = ? WHERE id = ?', [status, id]);
+    await orderCache.del([
+      orderCache.keys.orderDetail(id),
+      orderCache.keys.userOrders(currentOrder.user_id)
+    ]);
     return this.findById(id);
   },
 
   async create(payload) {
     const { user_id: userId, items = [], payment_method: paymentMethod = 'cod' } = payload;
-    const normalizedPaymentMethod = paymentMethod === 'bank_transfer' ? 'bank_transfer' : 'cod';
+    const normalizedPaymentMethod = normalizePaymentMethod(paymentMethod);
+    const shippingInfo = normalizeShippingInfo(payload.shipping_info);
+
+    if (!userId) {
+      throw createError(400, 'User ID is required');
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      throw createError(400, 'Order must contain at least one item');
+    }
     
     // 1. Fetch product details and check stock
     const detailedItems = await Promise.all(items.map(async (item) => {
+      if (!item.product_id || Number(item.quantity) <= 0) {
+        throw createError(400, 'Invalid order item');
+      }
+
       const product = await productClient.getById(item.product_id);
       if (product.stock < item.quantity) {
         throw new Error(`Product "${product.name}" does not have enough stock.`);
@@ -85,8 +182,26 @@ export const orderService = {
       
       // 2. Create order in pending state
       const [orderResult] = await connection.query(
-        'INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, ?)',
-        [userId, total, 'pending']
+        `INSERT INTO orders (
+          user_id,
+          total_amount,
+          status,
+          payment_method,
+          shipping_name,
+          shipping_phone,
+          shipping_address,
+          shipping_note
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          userId,
+          total,
+          'pending',
+          normalizedPaymentMethod,
+          shippingInfo.name,
+          shippingInfo.phone,
+          shippingInfo.address,
+          shippingInfo.note
+        ]
       );
       orderId = orderResult.insertId;
 
@@ -141,10 +256,10 @@ export const orderService = {
       }
 
       const order = await this.findById(orderId);
+      await orderCache.del(orderCache.keys.userOrders(userId));
       return {
         ...order,
-        payment_method: normalizedPaymentMethod,
-        items: detailedItems
+        payment_method: normalizedPaymentMethod
       };
     } catch (error) {
       if (!committed) {

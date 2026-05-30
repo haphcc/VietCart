@@ -90,3 +90,9 @@ cd frontend/customer-web
 npm install
 npm run dev
 ```
+
+## Scale Order Service va Redis Cache
+
+Huong dan chay nhieu instance Order Service, dat Load Balancer phia truoc va dung Redis Cache cho lich su/chi tiet don hang nam tai:
+
+- `docs/order-scale-cache.md`

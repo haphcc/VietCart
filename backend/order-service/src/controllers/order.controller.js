@@ -24,6 +24,9 @@ export async function createOrder(req, res, next) {
     const order = await orderService.create(req.body);
     res.status(201).json(order);
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
     if (error.message.includes('not enough stock') || error.message.includes('cancelled')) {
       return res.status(400).json({ message: error.message });
     }
