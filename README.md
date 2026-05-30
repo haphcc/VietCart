@@ -96,3 +96,11 @@ npm run dev
 Huong dan chay nhieu instance Cart Service, dat Load Balancer phia truoc va dung Redis Cache cho gio hang nam tai:
 
 - `docs/cart-scale-cache.md`
+
+Lenh tu dong cho dung mo hinh Chuong III:
+
+```powershell
+npm run dev:scale
+```
+
+Lenh nay chay backend bang Docker Compose, gom Redis, `cart-lb`, 3 Cart Service instances, va chay frontend local bang Vite. Khong chay cung luc voi `npm run dev` vi hai lenh se dung chung port `3000-3006`.

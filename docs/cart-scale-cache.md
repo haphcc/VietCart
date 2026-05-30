@@ -28,6 +28,12 @@ Chay backend, Redis va Load Balancer:
 docker compose up --build
 ```
 
+Neu muon tu dong chay backend Docker va frontend local bang mot lenh:
+
+```powershell
+npm run dev:scale
+```
+
 Kien truc Cart Service trong Docker Compose:
 
 - `redis`: Redis cache dung chung cho cac Cart Service instance.
