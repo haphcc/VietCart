@@ -17,10 +17,6 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-INSERT INTO products (name, description, price, stock, image_url) VALUES
-('Ao thun VietCart', 'San pham demo cho Product Service', 129000, 50, '/images/products/product-1.jpg'),
-('Balo cong nghe', 'Balo di hoc va di lam', 349000, 25, '/images/products/product-2.jpg');
-
 USE vietcart_cart;
 CREATE TABLE IF NOT EXISTS cart_items (
   id INT AUTO_INCREMENT PRIMARY KEY,
