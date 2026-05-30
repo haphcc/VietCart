@@ -1,0 +1,12 @@
+{
+  "userId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 1,
+      "price": 100000
+    }
+  ],
+  "shippingAddress": "Dia chi test load testing",
+  "note": "Don hang tao boi Apache Benchmark"
+}

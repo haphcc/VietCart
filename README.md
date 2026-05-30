@@ -104,3 +104,11 @@ npm run dev:scale
 ```
 
 Lenh nay chay backend bang Docker Compose, gom Redis, `cart-lb`, 3 Cart Service instances, va chay frontend local bang Vite. Khong chay cung luc voi `npm run dev` vi hai lenh se dung chung port `3000-3006`.
+
+## Load Testing / Performance Testing
+
+Phan kiem thu hieu nang cho Chuong V / Cau 5 nam tai:
+
+- `tests/load-testing`
+
+Thu muc nay co script Apache Benchmark, payload mau, noi luu ket qua va mau bang tong hop bao cao. Xem huong dan chi tiet trong `tests/load-testing/README.md`.
