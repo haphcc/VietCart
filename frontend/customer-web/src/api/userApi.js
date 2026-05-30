@@ -7,5 +7,9 @@ export const userApi = {
   me: () => axiosClient.get('/users/me', { headers: getAuthHeaders() }),
   updateMe: (payload) => axiosClient.patch('/users/me', payload, { headers: getAuthHeaders() }),
   changePassword: (payload) => axiosClient.patch('/users/me/password', payload, { headers: getAuthHeaders() }),
-  getById: (id) => axiosClient.get(`/users/${id}`, { headers: getAuthHeaders() })
+  getById: (id) => axiosClient.get(`/users/${id}`, { headers: getAuthHeaders() }),
+  adminList: () => axiosClient.get('/users/admin/users', { headers: getAuthHeaders() }),
+  adminCreate: (payload) => axiosClient.post('/users/admin/users', payload, { headers: getAuthHeaders() }),
+  adminUpdate: (id, payload) => axiosClient.patch(`/users/admin/users/${id}`, payload, { headers: getAuthHeaders() }),
+  adminDelete: (id) => axiosClient.delete(`/users/admin/users/${id}`, { headers: getAuthHeaders() })
 };

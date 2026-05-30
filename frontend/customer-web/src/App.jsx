@@ -9,6 +9,7 @@ import OrderHistoryPage from './pages/OrderHistoryPage.jsx';
 import NotificationPage from './pages/NotificationPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import AdminPage from './pages/AdminPage.jsx';
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Route>
     </Routes>
   );

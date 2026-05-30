@@ -37,7 +37,34 @@ function validateRegisterPayload(payload) {
   };
 }
 
+function normalizeRole(role) {
+  return role === 'admin' ? 'admin' : 'customer';
+}
+
+function normalizeBoolean(value, fallback = true) {
+  if (value === undefined) return fallback;
+  return value === true || value === 'true' || value === 1 || value === '1';
+}
+
 export const userService = {
+  async findAll() {
+    const [rows] = await pool.query(
+      `SELECT
+        id,
+        name,
+        email,
+        phone,
+        address,
+        role,
+        is_active,
+        created_at,
+        updated_at
+       FROM users
+       ORDER BY id DESC`
+    );
+    return rows;
+  },
+
   async findById(id) {
     const [rows] = await pool.query(
       'SELECT id, name, email, phone, address, role, is_active, created_at, updated_at FROM users WHERE id = ? AND is_active = TRUE',
@@ -69,6 +96,43 @@ export const userService = {
     });
 
     return { user, token };
+  },
+
+  async createByAdmin(payload) {
+    const data = validateRegisterPayload({
+      ...payload,
+      password: payload.password || '123456'
+    });
+    const [existingRows] = await pool.query('SELECT id FROM users WHERE email = ?', [data.email]);
+    if (existingRows.length > 0) throw createError(409, 'Email already exists');
+
+    const passwordHash = await bcrypt.hash(data.password, 10);
+    const [result] = await pool.query(
+      `INSERT INTO users (
+        name,
+        email,
+        password_hash,
+        phone,
+        address,
+        role,
+        is_active
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        data.name,
+        data.email,
+        passwordHash,
+        data.phone,
+        data.address,
+        normalizeRole(payload.role),
+        normalizeBoolean(payload.is_active, true)
+      ]
+    );
+
+    const [rows] = await pool.query(
+      'SELECT id, name, email, phone, address, role, is_active, created_at, updated_at FROM users WHERE id = ?',
+      [result.insertId]
+    );
+    return rows[0] || null;
   },
 
   async login(payload) {
@@ -124,6 +188,63 @@ export const userService = {
     });
 
     return user;
+  },
+
+  async updateByAdmin(id, payload) {
+    const allowed = {
+      name: payload.name,
+      email: payload.email !== undefined ? normalizeEmail(payload.email) : undefined,
+      phone: payload.phone,
+      address: payload.address,
+      role: payload.role !== undefined ? normalizeRole(payload.role) : undefined,
+      is_active: payload.is_active !== undefined ? normalizeBoolean(payload.is_active) : undefined
+    };
+
+    if (allowed.name !== undefined && !String(allowed.name).trim()) {
+      throw createError(400, 'Name is required');
+    }
+
+    if (allowed.email !== undefined && !allowed.email.includes('@')) {
+      throw createError(400, 'Valid email is required');
+    }
+
+    if (allowed.email !== undefined) {
+      const [existingRows] = await pool.query('SELECT id FROM users WHERE email = ? AND id <> ?', [allowed.email, id]);
+      if (existingRows.length > 0) throw createError(409, 'Email already exists');
+    }
+
+    const fields = [];
+    const values = [];
+    for (const [key, value] of Object.entries(allowed)) {
+      if (value !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(value === null ? null : typeof value === 'string' ? value.trim() : value);
+      }
+    }
+
+    const password = String(payload.password || '');
+    if (password) {
+      if (password.length < 6) throw createError(400, 'Password must be at least 6 characters');
+      fields.push('password_hash = ?');
+      values.push(await bcrypt.hash(password, 10));
+    }
+
+    if (fields.length === 0) throw createError(400, 'No user fields to update');
+
+    values.push(id);
+    const [result] = await pool.query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
+    if (result.affectedRows === 0) throw createError(404, 'User not found');
+
+    const [rows] = await pool.query(
+      'SELECT id, name, email, phone, address, role, is_active, created_at, updated_at FROM users WHERE id = ?',
+      [id]
+    );
+    return rows[0] || null;
+  },
+
+  async deactivate(id) {
+    const [result] = await pool.query('UPDATE users SET is_active = FALSE WHERE id = ?', [id]);
+    return result.affectedRows > 0;
   },
 
   async changePassword(id, payload) {

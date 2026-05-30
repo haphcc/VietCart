@@ -1,15 +1,28 @@
 import { Router } from 'express';
-import { createProduct, getProductById, getProducts, syncStock, reserveStock, confirmReservation, releaseReservation } from '../controllers/product.controller.js';
+import {
+  confirmReservation,
+  createProduct,
+  deleteProduct,
+  getProductById,
+  getProducts,
+  releaseReservation,
+  reserveStock,
+  syncStock,
+  updateProduct
+} from '../controllers/product.controller.js';
+import { authMiddleware, requireAdmin, requireInternalApiKey } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
 router.get('/', getProducts);
-router.post('/sync-stock', syncStock);
-router.post('/reserve-stock', reserveStock);
-router.post('/confirm-reservation', confirmReservation);
-router.post('/release-reservation', releaseReservation);
+router.post('/sync-stock', requireInternalApiKey, syncStock);
+router.post('/reserve-stock', requireInternalApiKey, reserveStock);
+router.post('/confirm-reservation', requireInternalApiKey, confirmReservation);
+router.post('/release-reservation', requireInternalApiKey, releaseReservation);
 router.get('/:id', getProductById);
-router.post('/', createProduct);
+router.post('/', authMiddleware, requireAdmin, createProduct);
+router.patch('/:id', authMiddleware, requireAdmin, updateProduct);
+router.delete('/:id', authMiddleware, requireAdmin, deleteProduct);
 
 export default router;
 

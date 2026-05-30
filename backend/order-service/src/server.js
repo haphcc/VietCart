@@ -21,6 +21,13 @@ app.get('/health', (req, res) => {
 
 app.use('/orders', orderRoutes);
 
+app.use((error, req, res, next) => {
+  const statusCode = error.statusCode || 500;
+  res.status(statusCode).json({
+    message: error.message || 'Internal server error'
+  });
+});
+
 app.listen(port, () => {
   console.log(`Order Service running on port ${port}`);
   registerOrderEventHandlers();

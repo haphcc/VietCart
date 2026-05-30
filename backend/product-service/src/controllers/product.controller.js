@@ -1,5 +1,19 @@
 import { productService } from '../services/product.service.js';
 
+function handleServiceError(error, res, next) {
+  if (error.statusCode) {
+    return res.status(error.statusCode).json({ message: error.message });
+  }
+
+  if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.code === 'ER_ROW_IS_REFERENCED') {
+    return res.status(409).json({
+      message: 'Product is referenced by stock reservations and cannot be deleted'
+    });
+  }
+
+  return next(error);
+}
+
 export async function getProducts(req, res, next) {
   try {
     const products = await productService.findAll();
@@ -24,7 +38,26 @@ export async function createProduct(req, res, next) {
     const product = await productService.create(req.body);
     res.status(201).json(product);
   } catch (error) {
-    next(error);
+    handleServiceError(error, res, next);
+  }
+}
+
+export async function updateProduct(req, res, next) {
+  try {
+    const product = await productService.update(req.params.id, req.body);
+    res.json(product);
+  } catch (error) {
+    handleServiceError(error, res, next);
+  }
+}
+
+export async function deleteProduct(req, res, next) {
+  try {
+    const deleted = await productService.remove(req.params.id);
+    if (!deleted) return res.status(404).json({ message: 'Product not found' });
+    return res.status(204).send();
+  } catch (error) {
+    return handleServiceError(error, res, next);
   }
 }
 

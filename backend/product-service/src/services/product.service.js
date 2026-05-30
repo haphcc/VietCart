@@ -1,5 +1,46 @@
 import { pool } from '../config/database.js';
 
+function createError(statusCode, message) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
+
+function normalizeProductPayload(payload, { partial = false } = {}) {
+  const data = {};
+
+  if (!partial || payload.name !== undefined) {
+    data.name = String(payload.name || '').trim();
+    if (!data.name) throw createError(400, 'Product name is required');
+  }
+
+  if (!partial || payload.description !== undefined) {
+    data.description = payload.description === undefined || payload.description === null
+      ? null
+      : String(payload.description).trim();
+  }
+
+  if (!partial || payload.price !== undefined) {
+    data.price = Number(payload.price);
+    if (!Number.isFinite(data.price) || data.price < 0) {
+      throw createError(400, 'Product price must be greater than or equal to 0');
+    }
+  }
+
+  if (!partial || payload.stock !== undefined) {
+    data.stock = Number(payload.stock);
+    if (!Number.isInteger(data.stock) || data.stock < 0) {
+      throw createError(400, 'Product stock must be a non-negative integer');
+    }
+  }
+
+  if (!partial || payload.image_url !== undefined) {
+    data.image_url = payload.image_url ? String(payload.image_url).trim() : null;
+  }
+
+  return data;
+}
+
 export const productService = {
   async findAll() {
     const [rows] = await pool.query('SELECT * FROM products ORDER BY id DESC');
@@ -12,12 +53,37 @@ export const productService = {
   },
 
   async create(payload) {
-    const { name, description, price, stock, image_url: imageUrl } = payload;
+    const data = normalizeProductPayload(payload);
     const [result] = await pool.query(
       'INSERT INTO products (name, description, price, stock, image_url) VALUES (?, ?, ?, ?, ?)',
-      [name, description, price, stock, imageUrl]
+      [data.name, data.description, data.price, data.stock, data.image_url]
     );
-    return { id: result.insertId, ...payload };
+    return this.findById(result.insertId);
+  },
+
+  async update(id, payload) {
+    const data = normalizeProductPayload(payload, { partial: true });
+    const fields = [];
+    const values = [];
+
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(value);
+      }
+    }
+
+    if (fields.length === 0) throw createError(400, 'No product fields to update');
+
+    values.push(id);
+    const [result] = await pool.query(`UPDATE products SET ${fields.join(', ')} WHERE id = ?`, values);
+    if (result.affectedRows === 0) throw createError(404, 'Product not found');
+    return this.findById(id);
+  },
+
+  async remove(id) {
+    const [result] = await pool.query('DELETE FROM products WHERE id = ?', [id]);
+    return result.affectedRows > 0;
   },
 
   async syncStock(items) {
