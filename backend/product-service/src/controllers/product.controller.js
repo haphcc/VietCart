@@ -5,6 +5,16 @@ function handleServiceError(error, res, next) {
     return res.status(error.statusCode).json({ message: error.message });
   }
 
+  if (
+    error.message.includes('not found') ||
+    error.message.includes('not have enough stock') ||
+    error.message.includes('do not exist') ||
+    error.message.includes('expired') ||
+    error.message.includes('released')
+  ) {
+    return res.status(400).json({ message: error.message });
+  }
+
   if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.code === 'ER_ROW_IS_REFERENCED') {
     return res.status(409).json({
       message: 'Product is referenced by stock reservations and cannot be deleted'
@@ -70,11 +80,7 @@ export async function syncStock(req, res, next) {
     const result = await productService.syncStock(items);
     res.json(result);
   } catch (error) {
-    // Treat stock shortage or product not found as a bad request rather than server error
-    if (error.message.includes('not found') || error.message.includes('not have enough stock')) {
-      return res.status(400).json({ message: error.message });
-    }
-    next(error);
+    handleServiceError(error, res, next);
   }
 }
 
@@ -87,10 +93,7 @@ export async function reserveStock(req, res, next) {
     const result = await productService.reserveStock(items, orderId || null);
     res.json(result);
   } catch (error) {
-    if (error.message.includes('not found') || error.message.includes('not have enough stock')) {
-      return res.status(400).json({ message: error.message });
-    }
-    next(error);
+    handleServiceError(error, res, next);
   }
 }
 
@@ -103,7 +106,7 @@ export async function confirmReservation(req, res, next) {
     const result = await productService.confirmReservation(reservationIds);
     res.json(result);
   } catch (error) {
-    next(error);
+    handleServiceError(error, res, next);
   }
 }
 
@@ -116,7 +119,7 @@ export async function releaseReservation(req, res, next) {
     const result = await productService.releaseReservation(reservationIds);
     res.json(result);
   } catch (error) {
-    next(error);
+    handleServiceError(error, res, next);
   }
 }
 

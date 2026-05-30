@@ -1,5 +1,19 @@
 import { orderService } from '../services/order.service.js';
 
+function handleServiceError(error, res, next) {
+  if (error.statusCode) {
+    return res.status(error.statusCode).json({ message: error.message });
+  }
+
+  if (error.response?.status) {
+    return res.status(error.response.status).json({
+      message: error.response.data?.message || error.message
+    });
+  }
+
+  return next(error);
+}
+
 export async function getOrders(req, res, next) {
   try {
     const orders = await orderService.findAll();
@@ -58,10 +72,7 @@ export async function updateOrderStatus(req, res, next) {
     const order = await orderService.updateStatus(req.params.id, status);
     res.json(order);
   } catch (error) {
-    if (error.statusCode) {
-      return res.status(error.statusCode).json({ message: error.message });
-    }
-    return next(error);
+    return handleServiceError(error, res, next);
   }
 }
 

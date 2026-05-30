@@ -34,19 +34,12 @@ INSERT INTO users (id, name, email, password_hash, phone, address, role, is_acti
 (17, 'Customer 17', 'user17@vietcart.local', '$2a$10$SgebjrLMXmkkdb.a3aBxZOSqq9hqOuFecQ1tiUQsPI2XPsftGORNe', '0900000017', 'Demo address 17', 'customer', TRUE),
 (18, 'Customer 18', 'user18@vietcart.local', '$2a$10$SgebjrLMXmkkdb.a3aBxZOSqq9hqOuFecQ1tiUQsPI2XPsftGORNe', '0900000018', 'Demo address 18', 'customer', TRUE),
 (19, 'Customer 19', 'user19@vietcart.local', '$2a$10$SgebjrLMXmkkdb.a3aBxZOSqq9hqOuFecQ1tiUQsPI2XPsftGORNe', '0900000019', 'Demo address 19', 'customer', TRUE),
-(20, 'Customer 20', 'user20@vietcart.local', '$2a$10$SgebjrLMXmkkdb.a3aBxZOSqq9hqOuFecQ1tiUQsPI2XPsftGORNe', '0900000020', 'Demo address 20', 'customer', TRUE)
+(20, 'Customer 20', 'user20@vietcart.local', '$2a$10$SgebjrLMXmkkdb.a3aBxZOSqq9hqOuFecQ1tiUQsPI2XPsftGORNe', '0900000020', 'Demo address 20', 'customer', TRUE),
+(21,'VietCart Admin', 'admin@vietcart.local', '$2a$10$SgebjrLMXmkkdb.a3aBxZOSqq9hqOuFecQ1tiUQsPI2XPsftGORNe', '0900000000', 'VietCart Admin Office', 'admin', TRUE)
+
 ON DUPLICATE KEY UPDATE
   name = VALUES(name),
   password_hash = VALUES(password_hash),
-  phone = VALUES(phone),
-  address = VALUES(address),
-  role = VALUES(role),
-  is_active = VALUES(is_active);
-
-INSERT INTO users (name, email, password_hash, phone, address, role, is_active) VALUES
-('VietCart Admin', 'admin@vietcart.local', '$2a$10$SgebjrLMXmkkdb.a3aBxZOSqq9hqOuFecQ1tiUQsPI2XPsftGORNe', '0900000000', 'VietCart Admin Office', 'admin', TRUE)
-ON DUPLICATE KEY UPDATE
-  name = VALUES(name),
   phone = VALUES(phone),
   address = VALUES(address),
   role = VALUES(role),
