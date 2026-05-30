@@ -46,6 +46,15 @@ export async function createOrder(req, res, next) {
 export async function updateOrderStatus(req, res, next) {
   try {
     const { status } = req.body;
+    const currentOrder = await orderService.findById(req.params.id, { includeItems: false });
+    if (!currentOrder) return res.status(404).json({ message: 'Order not found' });
+
+    const isAdmin = req.internal || req.user?.role === 'admin';
+    const isOwnerCancellation = status === 'cancelled' && Number(currentOrder.user_id) === Number(req.user?.id);
+    if (!isAdmin && !isOwnerCancellation) {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+
     const order = await orderService.updateStatus(req.params.id, status);
     res.json(order);
   } catch (error) {
