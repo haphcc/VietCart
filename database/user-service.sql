@@ -42,3 +42,12 @@ ON DUPLICATE KEY UPDATE
   address = VALUES(address),
   role = VALUES(role),
   is_active = VALUES(is_active);
+
+INSERT INTO users (name, email, password_hash, phone, address, role, is_active) VALUES
+('VietCart Admin', 'admin@vietcart.local', '$2a$10$SgebjrLMXmkkdb.a3aBxZOSqq9hqOuFecQ1tiUQsPI2XPsftGORNe', '0900000000', 'VietCart Admin Office', 'admin', TRUE)
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  phone = VALUES(phone),
+  address = VALUES(address),
+  role = VALUES(role),
+  is_active = VALUES(is_active);

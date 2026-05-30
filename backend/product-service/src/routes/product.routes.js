@@ -1,5 +1,15 @@
 import { Router } from 'express';
-import { createProduct, getProductById, getProducts, syncStock, reserveStock, confirmReservation, releaseReservation } from '../controllers/product.controller.js';
+import {
+  confirmReservation,
+  createProduct,
+  deleteProduct,
+  getProductById,
+  getProducts,
+  releaseReservation,
+  reserveStock,
+  syncStock,
+  updateProduct
+} from '../controllers/product.controller.js';
 
 const router = Router();
 
@@ -10,6 +20,8 @@ router.post('/confirm-reservation', confirmReservation);
 router.post('/release-reservation', releaseReservation);
 router.get('/:id', getProductById);
 router.post('/', createProduct);
+router.patch('/:id', updateProduct);
+router.delete('/:id', deleteProduct);
 
 export default router;
 

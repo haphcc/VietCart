@@ -112,3 +112,5 @@ Phan kiem thu hieu nang cho Chuong V / Cau 5 nam tai:
 - `tests/load-testing`
 
 Thu muc nay co script Apache Benchmark, payload mau, noi luu ket qua va mau bang tong hop bao cao. Xem huong dan chi tiet trong `tests/load-testing/README.md`.
+
+tk admin: admin@vietcart.local / 123456

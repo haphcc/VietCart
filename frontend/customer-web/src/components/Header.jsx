@@ -61,6 +61,14 @@ export default function Header() {
         >
           Thông báo
         </NavLink>
+        {auth?.user?.role === 'admin' && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
+          >
+            Admin
+          </NavLink>
+        )}
       </nav>
       <div className="header-auth">
         {auth?.user ? (

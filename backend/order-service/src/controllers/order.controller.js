@@ -1,5 +1,14 @@
 import { orderService } from '../services/order.service.js';
 
+export async function getOrders(req, res, next) {
+  try {
+    const orders = await orderService.findAll();
+    res.json(orders);
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function getOrdersByUser(req, res, next) {
   try {
     const orders = await orderService.findByUser(req.params.userId);

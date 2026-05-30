@@ -38,6 +38,17 @@ function parseReservationIds(order) {
 }
 
 export const orderService = {
+  async findAll() {
+    const [rows] = await pool.query(
+      `SELECT
+        o.*,
+        (SELECT COUNT(*) FROM order_items oi WHERE oi.order_id = o.id) AS item_count
+       FROM orders o
+       ORDER BY o.id DESC`
+    );
+    return rows;
+  },
+
   async findByUser(userId) {
     const [rows] = await pool.query(
       `SELECT
