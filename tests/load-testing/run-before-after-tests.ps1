@@ -45,9 +45,47 @@ function Invoke-AbGet {
 
   $oldPreference = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
-  & $script:AbExe -n $Total -c $Concurrency $Url 2>&1 | Tee-Object -FilePath $OutputFile -Append
+  $abOutput = & $script:AbExe -n $Total -c $Concurrency $Url 2>&1
   $ErrorActionPreference = $oldPreference
+
+  $abOutput | Tee-Object -FilePath $OutputFile -Append
   '' | Tee-Object -FilePath $OutputFile -Append
+
+  $abText = ($abOutput | Out-String)
+  $abLines = @($abOutput | ForEach-Object { $_.ToString() })
+
+  function Get-AbValue([string[]]$Lines, [string]$Pattern) {
+    foreach ($line in $Lines) {
+      if ($line -match $Pattern) {
+        return $Matches[1]
+      }
+    }
+    return $null
+  }
+
+  $metrics = [ordered]@{
+    RequestsPerSecond = Get-AbValue $abLines '^Requests per second:\s+([0-9.]+)\s+\[#/sec\] \(mean\)$'
+    TimePerRequestMs   = Get-AbValue $abLines '^Time per request:\s+([0-9.]+)\s+\[ms\] \(mean\)$'
+    FailedRequests     = Get-AbValue $abLines '^Failed requests:\s+([0-9]+)$'
+    Non2xxResponses    = Get-AbValue $abLines '^Non-2xx responses:\s+([0-9]+)$'
+    TransferRateKBs    = Get-AbValue $abLines '^Transfer rate:\s+([0-9.]+)\s+\[Kbytes/sec\] received$'
+  }
+
+  if ([string]::IsNullOrWhiteSpace($metrics.RequestsPerSecond)) { $metrics.RequestsPerSecond = '0' }
+  if ([string]::IsNullOrWhiteSpace($metrics.TimePerRequestMs)) { $metrics.TimePerRequestMs = '0' }
+  if ([string]::IsNullOrWhiteSpace($metrics.FailedRequests)) { $metrics.FailedRequests = '0' }
+  if ([string]::IsNullOrWhiteSpace($metrics.Non2xxResponses)) { $metrics.Non2xxResponses = '0' }
+  if ([string]::IsNullOrWhiteSpace($metrics.TransferRateKBs)) { $metrics.TransferRateKBs = '0' }
+
+  return [pscustomobject]@{
+    Label              = $Label
+    Url                = $Url
+    RequestsPerSecond  = $metrics.RequestsPerSecond
+    TimePerRequestMs   = $metrics.TimePerRequestMs
+    FailedRequests     = $metrics.FailedRequests
+    Non2xxResponses    = $metrics.Non2xxResponses
+    TransferRateKBs    = $metrics.TransferRateKBs
+  }
 }
 
 $script:AbExe = Find-Ab
@@ -74,25 +112,56 @@ $scenarios = @(
   @{ Solution = 'Đồng bộ tồn kho qua Product Service'; Endpoint = '/api/products/1'; Note = 'đọc sản phẩm để theo dõi API tồn kho' }
 )
 
+$rows = @()
+
 foreach ($scenario in $scenarios) {
-  Invoke-AbGet $OutputFile "$($scenario.Solution) - TRƯỚC cải tiến - $($scenario.Note)" "$BaselineUrl$($scenario.Endpoint)"
-  Invoke-AbGet $OutputFile "$($scenario.Solution) - SAU cải tiến - $($scenario.Note)" "$OptimizedUrl$($scenario.Endpoint)"
+  $before = Invoke-AbGet $OutputFile "$($scenario.Solution) - TRƯỚC cải tiến - $($scenario.Note)" "$BaselineUrl$($scenario.Endpoint)"
+  $after = Invoke-AbGet $OutputFile "$($scenario.Solution) - SAU cải tiến - $($scenario.Note)" "$OptimizedUrl$($scenario.Endpoint)"
+
+  $rows += [pscustomobject]@{
+    Solution         = $scenario.Solution
+    Status           = 'Trước cải tiến'
+    Api              = "GET $($scenario.Endpoint)"
+    Total            = $Total
+    Concurrency      = $Concurrency
+    RequestsPerSecond = $before.RequestsPerSecond
+    TimePerRequestMs = $before.TimePerRequestMs
+    FailedRequests   = $before.FailedRequests
+    Non2xxResponses  = $before.Non2xxResponses
+    Note             = 'Điền từ file kết quả gốc'
+  }
+
+  $rows += [pscustomobject]@{
+    Solution         = $scenario.Solution
+    Status           = 'Sau cải tiến'
+    Api              = "GET $($scenario.Endpoint)"
+    Total            = $Total
+    Concurrency      = $Concurrency
+    RequestsPerSecond = $after.RequestsPerSecond
+    TimePerRequestMs = $after.TimePerRequestMs
+    FailedRequests   = $after.FailedRequests
+    Non2xxResponses  = $after.Non2xxResponses
+    Note             = 'So sánh với dòng trước'
+  }
 }
 
-@(
+$summaryLines = @(
   '# Bảng so sánh trước/sau load testing'
   ''
   "File kết quả gốc: ``$(Split-Path -Leaf $OutputFile)``"
   ''
   '| Giải pháp | Trạng thái | API kiểm thử | Tổng request | Request đồng thời | Requests per second | Time per request | Failed requests | Non-2xx responses | Nhận xét |'
   '| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |'
-  "| Redis cache cho Cart Service | Trước cải tiến | GET /api/cart/1 | $Total | $Concurrency |  |  |  |  | Điền từ file kết quả gốc |"
-  "| Redis cache cho Cart Service | Sau cải tiến | GET /api/cart/1 | $Total | $Concurrency |  |  |  |  | So sánh với dòng trước |"
-  "| Scale Cart Service qua Load Balancer | Trước cải tiến | GET /api/cart/1 | $Total | $Concurrency |  |  |  |  | Chạy với mô hình thường |"
-  "| Scale Cart Service qua Load Balancer | Sau cải tiến | GET /api/cart/1 | $Total | $Concurrency |  |  |  |  | Chạy với npm run dev:scale hoặc Docker Compose |"
-  "| Đồng bộ tồn kho qua Product Service | Trước cải tiến | GET /api/products/1 | $Total | $Concurrency |  |  |  |  | Theo dõi API liên quan tồn kho |"
-  "| Đồng bộ tồn kho qua Product Service | Sau cải tiến | GET /api/products/1 | $Total | $Concurrency |  |  |  |  | Bổ sung POST reserve-stock nếu cần test ghi |"
-) | Set-Content -Path $SummaryFile -Encoding UTF8
+)
+
+foreach ($row in $rows) {
+  $summaryLines += "| $($row.Solution) | $($row.Status) | $($row.Api) | $($row.Total) | $($row.Concurrency) | $($row.RequestsPerSecond) | $($row.TimePerRequestMs) | $($row.FailedRequests) | $($row.Non2xxResponses) | $($row.Note) |"
+}
+
+$summaryLines += ''
+$summaryLines += 'Ghi chú: nếu API Gateway đang bật rate limit 120 request/phút, các mức tải cao có thể phát sinh `Non-2xx responses` do bị giới hạn request.'
+
+$summaryLines | Set-Content -Path $SummaryFile -Encoding UTF8
 
 Write-Host "Đã lưu kết quả gốc: $OutputFile"
 Write-Host "Đã tạo bảng điền kết quả: $SummaryFile"
