@@ -14,7 +14,7 @@ function spawnChild(name, command, args) {
   const child = spawn(command, args, {
     cwd: rootDir,
     stdio: 'inherit',
-    shell: false
+    shell: isWindows
   });
 
   child.on('exit', (code) => {
@@ -48,7 +48,7 @@ function shutdown() {
   spawn(dockerCmd, ['compose', 'down'], {
     cwd: rootDir,
     stdio: 'inherit',
-    shell: false
+    shell: isWindows
   }).on('exit', () => process.exit(0));
 }
 
