@@ -1,8 +1,9 @@
 FROM node:22-alpine
 WORKDIR /app
-COPY package*.json ./
+COPY api-gateway/package*.json ./
 RUN npm install
-COPY . .
+RUN ln -s /app/node_modules /node_modules
+COPY api-gateway/ ./
+COPY shared /shared
 EXPOSE 3000
 CMD ["npm", "start"]
-

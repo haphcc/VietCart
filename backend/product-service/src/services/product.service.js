@@ -70,11 +70,18 @@ export const productService = {
     try {
       await connection.beginTransaction();
 
-      const sortedItems = [...items].sort((a, b) => a.product_id - b.product_id);
-      const reservationIds = [];
-      const reservedItems = [];
+      const sortedItems = items
+        .map((item, originalIndex) => ({ ...item, originalIndex }))
+        .sort((a, b) => Number(a.product_id) - Number(b.product_id));
+      const orderedReservationIds = new Array(items.length);
+      const orderedReservedItems = new Array(items.length);
 
       for (const item of sortedItems) {
+        const quantity = Number(item.quantity);
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+          throw new Error(`Invalid quantity for product ID ${item.product_id}`);
+        }
+
         const [rows] = await connection.query(
           'SELECT stock, name, price FROM products WHERE id = ? FOR UPDATE',
           [item.product_id]
@@ -91,32 +98,31 @@ export const productService = {
 
         await connection.query(
           'UPDATE products SET stock = stock - ? WHERE id = ?',
-          [item.quantity, item.product_id]
+          [quantity, item.product_id]
         );
 
         const [result] = await connection.query(
           'INSERT INTO stock_reservations (product_id, quantity, order_id, status, expires_at) VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))',
-          [item.product_id, item.quantity, orderId, 'reserved']
+          [item.product_id, quantity, orderId, 'reserved']
         );
 
-        reservationIds.push(result.insertId);
-        reservedItems.push({
+        orderedReservationIds[item.originalIndex] = result.insertId;
+        orderedReservedItems[item.originalIndex] = {
           product_id: item.product_id,
-          quantity: item.quantity,
+          quantity,
           price: product.price,
           name: product.name
-        });
+        };
       }
 
       await connection.commit();
       committed = true;
 
-      // Re-order reservedItems to match the original items order (not sorted order)
-      const orderedReservedItems = items.map(item =>
-        reservedItems.find(ri => ri.product_id === item.product_id)
-      );
-
-      return { reservationIds, reservedItems: orderedReservedItems, message: 'Stock reserved successfully' };
+      return {
+        reservationIds: orderedReservationIds,
+        reservedItems: orderedReservedItems,
+        message: 'Stock reserved successfully'
+      };
     } catch (error) {
       if (!committed) {
         await connection.rollback();
@@ -135,7 +141,7 @@ export const productService = {
 
       // Check if all requested reservations exist and are not already released
       const [rows] = await connection.query(
-        'SELECT id, status FROM stock_reservations WHERE id IN (?)',
+        'SELECT id, status, expires_at FROM stock_reservations WHERE id IN (?) FOR UPDATE',
         [reservationIds]
       );
 
@@ -146,6 +152,9 @@ export const productService = {
       for (const row of rows) {
         if (row.status === 'released') {
           throw new Error('One or more stock reservations have already expired and been released');
+        }
+        if (row.status === 'reserved' && new Date(row.expires_at).getTime() < Date.now()) {
+          throw new Error('One or more stock reservations have expired');
         }
       }
 
@@ -176,7 +185,7 @@ export const productService = {
 
       // Fetch reservations sorted by product_id to avoid deadlocks, including confirmed ones
       const [reservations] = await connection.query(
-        'SELECT id, product_id, quantity FROM stock_reservations WHERE id IN (?) AND status IN (?, ?) ORDER BY product_id ASC',
+        'SELECT id, product_id, quantity FROM stock_reservations WHERE id IN (?) AND status IN (?, ?) ORDER BY product_id ASC FOR UPDATE',
         [reservationIds, 'reserved', 'confirmed']
       );
 
@@ -212,7 +221,7 @@ export const productService = {
       await connection.beginTransaction();
 
       const [expiredReservations] = await connection.query(
-        'SELECT id, product_id, quantity FROM stock_reservations WHERE status = ? AND expires_at < NOW() ORDER BY product_id ASC',
+        'SELECT id, product_id, quantity FROM stock_reservations WHERE status = ? AND expires_at < NOW() ORDER BY product_id ASC FOR UPDATE',
         ['reserved']
       );
 

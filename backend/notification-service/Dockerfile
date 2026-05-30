@@ -1,8 +1,9 @@
 FROM node:22-alpine
 WORKDIR /app
-COPY package*.json ./
+COPY notification-service/package*.json ./
 RUN npm install
-COPY . .
+RUN ln -s /app/node_modules /node_modules
+COPY notification-service/ ./
+COPY shared /shared
 EXPOSE 3005
 CMD ["npm", "start"]
-
