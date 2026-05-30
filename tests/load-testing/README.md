@@ -1,167 +1,225 @@
 # Load Testing / Performance Testing
 
-Thu muc nay phuc vu Chuong V / Cau 5: xay dung kich ban kiem thu tai cho project VietCart Microservices bang Apache Benchmark.
+Thư mục này phục vụ Chương V / Câu 5: xây dựng kịch bản kiểm thử tải cho project VietCart Microservices bằng Apache Benchmark.
 
-## Muc dich
+## Mục đích
 
-- Do kha nang dap ung cua API Gateway va cac service khi co nhieu request dong thoi.
-- Ghi lai cac chi so hieu nang de dua vao bao cao Chuong V.
-- Chuan bi san payload mau cho mot so API POST de nhom co the chinh theo du lieu that trong database.
+- Đo khả năng đáp ứng của API Gateway và các service khi có nhiều request đồng thời.
+- Ghi lại chỉ số hiệu năng để đưa vào báo cáo Chương V.
+- Có kịch bản so sánh trước/sau cải tiến cho 3 nhóm giải pháp: Redis cache, scale Cart Service, đồng bộ tồn kho.
+- Chuẩn bị payload mẫu cho một số API POST để nhóm chỉnh theo dữ liệu thật trong database.
 
-## Yeu cau
+## Yêu cầu
 
-Can cai Apache Benchmark, thuong co san trong Apache HTTP Server hoac XAMPP.
+Cần cài Apache Benchmark, thường có sẵn trong Apache HTTP Server hoặc XAMPP.
 
-Kiem tra da cai `ab` chua:
+Kiểm tra đã cài `ab` chưa:
 
 ```bash
 ab -V
 ```
 
-Neu chay tren Windows, co the dung Git Bash, WSL hoac terminal co cau hinh duong dan toi `ab.exe` cua XAMPP/Apache.
+Trên Windows, nếu dùng XAMPP thì `ab.exe` thường nằm tại:
 
-## Kiem tra server
+```text
+C:\xampp\apache\bin\ab.exe
+```
 
-Truoc khi chay load test, start project:
+Các script `.sh` đã có fallback tới đường dẫn này khi chạy bằng Git Bash/WSL.
+
+## Kiểm tra server
+
+Trước khi chạy load test, start project:
 
 ```powershell
 npm run dev
 ```
 
-Cac script se tu goi:
+Các script sẽ tự gọi:
 
 ```bash
 curl http://localhost:3000/health
 ```
 
-Neu API Gateway chua chay, script se bao:
+Nếu API Gateway chưa chạy, script sẽ báo:
 
 ```text
 API Gateway chưa chạy. Hãy start project trước khi chạy load test.
 ```
 
-## Cach chay
-
-Vao thu muc load testing:
+## Chạy từng nhóm API
 
 ```bash
 cd tests/load-testing
-```
-
-Chay tung script:
-
-```bash
-./test-health.sh
-./test-products.sh
-./test-cart.sh
-./test-orders.sh
-./test-users.sh
-./test-notifications.sh
-```
-
-Neu Git Bash/WSL bao chua co quyen chay file, dung:
-
-```bash
-chmod +x *.sh
-```
-
-Hoac chay truc tiep bang `bash`:
-
-```bash
 bash test-health.sh
 bash test-products.sh
+bash test-cart.sh
+bash test-orders.sh
+bash test-users.sh
+bash test-notifications.sh
 ```
 
-Chay toan bo:
-
-```bash
-./run-all-tests.sh
-```
-
-Hoac:
+Chạy toàn bộ:
 
 ```bash
 bash run-all-tests.sh
 ```
 
-Doi API Gateway URL bang bien moi truong:
+Đổi API Gateway URL bằng biến môi trường:
 
 ```bash
-BASE_URL=http://localhost:3000 ./test-products.sh
+BASE_URL=http://localhost:3000 bash test-products.sh
 ```
 
-Endpoint can JWT se dung bien moi truong `JWT_TOKEN`:
+Endpoint cần JWT sẽ dùng biến môi trường `JWT_TOKEN`:
 
 ```bash
-JWT_TOKEN=your_token_here ./test-notifications.sh
-JWT_TOKEN=your_token_here ./test-users.sh
+JWT_TOKEN=your_token_here bash test-notifications.sh
+JWT_TOKEN=your_token_here bash test-users.sh
 ```
 
-Neu `JWT_TOKEN` rong, script se bo qua endpoint can dang nhap.
+Nếu `JWT_TOKEN` rỗng, script sẽ bỏ qua endpoint cần đăng nhập.
 
-## Chay POST test mau
+## Kịch bản so sánh trước/sau cải tiến
 
-Mac dinh cac script POST khong chay de tranh tao nhieu du lieu rac. Muon chay POST test mau, dat:
+Script chính:
 
 ```bash
-RUN_POST_TESTS=1 ./test-cart.sh
-RUN_POST_TESTS=1 ./test-orders.sh
-RUN_POST_TESTS=1 ./test-users.sh
+bash run-before-after-tests.sh
 ```
 
-Payload nam trong:
+Trên Windows có thể chạy:
+
+```powershell
+.\run-before-after-tests.bat
+```
+
+Mặc định cả trước và sau đều trỏ tới `http://localhost:3000`. Khi nhóm có hai môi trường khác nhau, truyền URL riêng:
+
+```bash
+BASELINE_URL=http://localhost:3000 OPTIMIZED_URL=http://localhost:3000 bash run-before-after-tests.sh
+```
+
+Ý nghĩa:
+
+- `BASELINE_URL`: môi trường trước cải tiến.
+- `OPTIMIZED_URL`: môi trường sau cải tiến.
+- `LEVEL_TOTAL`: tổng request cho mỗi lượt, mặc định `300`.
+- `LEVEL_CONCURRENCY`: request đồng thời, mặc định `30`.
+
+Ví dụ:
+
+```bash
+LEVEL_TOTAL=500 LEVEL_CONCURRENCY=50 bash run-before-after-tests.sh
+```
+
+Ba nhóm so sánh trong script:
+
+- Redis cache cho Cart Service: `GET /api/cart/1`.
+- Scale Cart Service qua Load Balancer: `GET /api/cart/1`.
+- Đồng bộ tồn kho qua Product Service: `GET /api/products/1`.
+
+Mặc định script không chạy POST để tránh làm thay đổi tồn kho. Nếu cần kiểm thử ghi cho đồng bộ tồn kho:
+
+```bash
+RUN_WRITE_TESTS=1 bash run-before-after-tests.sh
+```
+
+Trước khi chạy ghi, hãy kiểm tra `payloads/reserve-stock.json` và chắc chắn `product_id` còn đủ tồn kho.
+
+## Chạy POST test mẫu
+
+Mặc định các script POST không chạy để tránh tạo nhiều dữ liệu rác. Muốn chạy POST test mẫu:
+
+```bash
+RUN_POST_TESTS=1 bash test-cart.sh
+RUN_POST_TESTS=1 bash test-orders.sh
+RUN_POST_TESTS=1 bash test-users.sh
+```
+
+Payload nằm trong:
 
 - `payloads/cart-item.json`
 - `payloads/order.json`
 - `payloads/user-register.json`
 - `payloads/user-login.json`
 - `payloads/payment.json`
+- `payloads/reserve-stock.json`
 
-Can chinh `userId`, `productId`, `orderId`, email va cac truong khac theo du lieu that trong database truoc khi chay POST.
+Cần chỉnh `userId`, `productId`, `orderId`, email và các trường khác theo dữ liệu thật trong database trước khi chạy POST.
 
-Vi du lenh Apache Benchmark POST:
+Ví dụ lệnh Apache Benchmark POST:
 
 ```bash
 ab -n 100 -c 10 -p payloads/cart-item.json -T application/json http://localhost:3000/api/cart/items
 ```
 
-## Muc tai dang dung
+## Mức tải đang dùng
 
-Moi script chay 3 muc tai:
+Mỗi script API cơ bản chạy 3 mức tải:
 
-- Nhe: `-n 100 -c 10`
-- Trung binh: `-n 500 -c 50`
-- Nang: `-n 1000 -c 100`
+- Nhẹ: `-n 100 -c 10`
+- Trung bình: `-n 500 -c 50`
+- Nặng: `-n 1000 -c 100`
 
-Y nghia tham so:
+Ý nghĩa tham số:
 
-- `-n`: tong so request gui di.
-- `-c`: so request dong thoi.
-- `Requests per second`: so request xu ly moi giay, cang cao cang tot.
-- `Time per request`: thoi gian trung binh cho moi request, cang thap cang tot.
-- `Failed requests`: so request loi, nen bang 0 trong kich ban on dinh.
-- `Transfer rate`: toc do truyen du lieu qua mang.
+- `-n`: tổng số request gửi đi.
+- `-c`: số request đồng thời.
+- `Requests per second`: số request xử lý mỗi giây, càng cao càng tốt.
+- `Time per request`: thời gian trung bình cho mỗi request, càng thấp càng tốt.
+- `Failed requests`: số request lỗi, nên bằng 0 trong kịch bản ổn định.
+- `Non-2xx responses`: số response không thuộc nhóm 2xx, thường xuất hiện nếu bị rate limit hoặc endpoint trả lỗi.
+- `Transfer rate`: tốc độ truyền dữ liệu qua mạng.
 
-## Ket qua
+## Kết quả và bằng chứng
 
-Ket qua duoc luu trong `results/`, ten file co timestamp, vi du:
+Kết quả thật khi chạy local được lưu trong:
+
+```text
+tests/load-testing/results/
+```
+
+Ví dụ:
 
 ```text
 results/products_2026-05-26_10-30-00.txt
 ```
 
-Khi doc ket qua, nen lay cac dong:
+Thư mục lưu bằng chứng có thể commit vào repo:
+
+```text
+tests/load-testing/evidence/
+```
+
+Sau khi chạy xong, có thể copy file `.txt` hoặc bảng `.md` quan trọng từ `results/` sang `evidence/` để nộp kèm báo cáo.
+
+Khi đọc kết quả, lấy các dòng:
 
 - `Requests per second`
 - `Time per request`
 - `Failed requests`
+- `Non-2xx responses`
 - `Transfer rate`
 
-Dung `report-template.md` de dien so lieu vao bang tong hop. Trong bao cao Chuong V nen so sanh tung muc tai, neu request loi tang khi `-c` cao thi ghi nhan API nao bat dau qua tai.
+Dùng `report-template.md` hoặc `evidence/before-after-template.md` để điền số liệu vào bảng tổng hợp. Trong báo cáo Chương V nên so sánh từng mức tải và ghi rõ nếu request lỗi tăng khi `-c` cao.
 
 ## Windows
 
-Co san cac file batch mau:
+Có sẵn các file batch:
+
+```bat
+test-health.bat
+test-products.bat
+test-cart.bat
+test-orders.bat
+test-users.bat
+test-notifications.bat
+run-all-tests.bat
+run-before-after-tests.bat
+```
+
+Chạy trong Command Prompt hoặc PowerShell:
 
 ```bat
 test-health.bat
@@ -169,12 +227,14 @@ test-products.bat
 run-all-tests.bat
 ```
 
-Chay trong Command Prompt hoac PowerShell:
+Nếu Windows không nhận `ab`, thêm `C:\xampp\apache\bin` vào `PATH`, hoặc chạy bằng Git Bash/WSL.
 
-```bat
-test-health.bat
-test-products.bat
-run-all-tests.bat
+## Ghi chú về rate limit
+
+API Gateway hiện có rate limit trong:
+
+```text
+backend/api-gateway/src/middlewares/rateLimit.middleware.js
 ```
 
-Neu Windows khong nhan `ab`, them thu muc Apache/XAMPP chua `ab.exe` vao `PATH`, hoac chay bang Git Bash/WSL.
+Nếu chạy mức tải cao, kết quả có thể xuất hiện `Non-2xx responses` do bị giới hạn request. Khi đưa vào báo cáo, cần ghi rõ đây là giới hạn bảo vệ API Gateway, không nhất thiết là lỗi xử lý nghiệp vụ của service.

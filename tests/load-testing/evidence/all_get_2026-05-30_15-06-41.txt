@@ -1,0 +1,1079 @@
+﻿BASE_URL: http://localhost:3000
+Started: 2026-05-30 15:06:41
+
+============================================================
+Health /health - tai nhe
+URL: http://localhost:3000/health
+Tong request: 100
+Request dong thoi: 10
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient).....done
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /health
+Document Length:        39 bytes
+
+Concurrency Level:      10
+Time taken for tests:   0.053 seconds
+Complete requests:      100
+Failed requests:        0
+Total transferred:      101419 bytes
+HTML transferred:       3900 bytes
+Requests per second:    1894.66 [#/sec] (mean)
+Time per request:       5.278 [ms] (mean)
+Time per request:       0.528 [ms] (mean, across all concurrent requests)
+Transfer rate:          1876.51 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.3      0       2
+Processing:     0    5   4.7      5      19
+Waiting:        0    4   4.1      3      18
+Total:          0    5   4.7      5      19
+
+Percentage of the requests served within a certain time (ms)
+  50%      5
+  66%      6
+  75%      6
+  80%      6
+  90%     15
+  95%     18
+  98%     19
+  99%     19
+ 100%     19 (longest request)
+
+============================================================
+Health /health - tai trung binh
+URL: http://localhost:3000/health
+Tong request: 500
+Request dong thoi: 50
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Finished 500 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /health
+Document Length:        39 bytes
+
+Concurrency Level:      50
+Time taken for tests:   0.250 seconds
+Complete requests:      500
+Failed requests:        481
+   (Connect: 0, Receive: 0, Length: 481, Exceptions: 0)
+Non-2xx responses:      481
+Total transferred:      519977 bytes
+HTML transferred:       20943 bytes
+Requests per second:    2003.87 [#/sec] (mean)
+Time per request:       24.952 [ms] (mean)
+Time per request:       0.499 [ms] (mean, across all concurrent requests)
+Transfer rate:          2035.09 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.9      0      10
+Processing:    10   24   4.9     25      37
+Waiting:        0   17   4.0     17      29
+Total:         10   24   4.9     25      37
+
+Percentage of the requests served within a certain time (ms)
+  50%     25
+  66%     26
+  75%     27
+  80%     28
+  90%     30
+  95%     31
+  98%     32
+  99%     35
+ 100%     37 (longest request)
+
+============================================================
+Health /health - tai nang
+URL: http://localhost:3000/health
+Tong request: 1000
+Request dong thoi: 100
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /health
+Document Length:        42 bytes
+
+Concurrency Level:      100
+Time taken for tests:   0.353 seconds
+Complete requests:      1000
+Failed requests:        0
+Non-2xx responses:      1000
+Total transferred:      1041000 bytes
+HTML transferred:       42000 bytes
+Requests per second:    2830.15 [#/sec] (mean)
+Time per request:       35.334 [ms] (mean)
+Time per request:       0.353 [ms] (mean, across all concurrent requests)
+Transfer rate:          2877.14 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.7      0      15
+Processing:    20   33   6.6     33      54
+Waiting:        0   27   6.3     26      50
+Total:         20   33   6.6     33      54
+
+Percentage of the requests served within a certain time (ms)
+  50%     33
+  66%     35
+  75%     36
+  80%     38
+  90%     41
+  95%     46
+  98%     49
+  99%     50
+ 100%     54 (longest request)
+
+============================================================
+Products list /api/products - tai nhe
+URL: http://localhost:3000/api/products
+Tong request: 100
+Request dong thoi: 10
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient).....done
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/products
+Document Length:        42 bytes
+
+Concurrency Level:      10
+Time taken for tests:   0.037 seconds
+Complete requests:      100
+Failed requests:        0
+Non-2xx responses:      100
+Total transferred:      104100 bytes
+HTML transferred:       4200 bytes
+Requests per second:    2736.35 [#/sec] (mean)
+Time per request:       3.655 [ms] (mean)
+Time per request:       0.365 [ms] (mean, across all concurrent requests)
+Transfer rate:          2781.78 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.1      0       1
+Processing:     0    3   4.9      3      18
+Waiting:        0    2   4.3      2      17
+Total:          0    3   4.9      3      18
+
+Percentage of the requests served within a certain time (ms)
+  50%      3
+  66%      3
+  75%      3
+  80%      3
+  90%     16
+  95%     17
+  98%     18
+  99%     18
+ 100%     18 (longest request)
+
+============================================================
+Products list /api/products - tai trung binh
+URL: http://localhost:3000/api/products
+Tong request: 500
+Request dong thoi: 50
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Finished 500 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/products
+Document Length:        42 bytes
+
+Concurrency Level:      50
+Time taken for tests:   0.226 seconds
+Complete requests:      500
+Failed requests:        0
+Non-2xx responses:      500
+Total transferred:      520500 bytes
+HTML transferred:       21000 bytes
+Requests per second:    2215.92 [#/sec] (mean)
+Time per request:       22.564 [ms] (mean)
+Time per request:       0.451 [ms] (mean, across all concurrent requests)
+Transfer rate:          2252.71 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.7      0      13
+Processing:     9   20   4.9     20      34
+Waiting:        0   14   5.1     13      29
+Total:          9   21   4.9     20      34
+
+Percentage of the requests served within a certain time (ms)
+  50%     20
+  66%     23
+  75%     24
+  80%     24
+  90%     27
+  95%     28
+  98%     30
+  99%     32
+ 100%     34 (longest request)
+
+============================================================
+Products list /api/products - tai nang
+URL: http://localhost:3000/api/products
+Tong request: 1000
+Request dong thoi: 100
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/products
+Document Length:        42 bytes
+
+Concurrency Level:      100
+Time taken for tests:   0.331 seconds
+Complete requests:      1000
+Failed requests:        0
+Non-2xx responses:      1000
+Total transferred:      1041000 bytes
+HTML transferred:       42000 bytes
+Requests per second:    3024.82 [#/sec] (mean)
+Time per request:       33.060 [ms] (mean)
+Time per request:       0.331 [ms] (mean, across all concurrent requests)
+Transfer rate:          3075.04 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.6      0      12
+Processing:     8   31   6.3     31      46
+Waiting:        2   25   6.1     25      40
+Total:          8   31   6.3     31      46
+
+Percentage of the requests served within a certain time (ms)
+  50%     31
+  66%     33
+  75%     34
+  80%     34
+  90%     37
+  95%     40
+  98%     43
+  99%     45
+ 100%     46 (longest request)
+
+============================================================
+Product detail /api/products/1 - tai nhe
+URL: http://localhost:3000/api/products/1
+Tong request: 100
+Request dong thoi: 10
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient).....done
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/products/1
+Document Length:        42 bytes
+
+Concurrency Level:      10
+Time taken for tests:   0.035 seconds
+Complete requests:      100
+Failed requests:        0
+Non-2xx responses:      100
+Total transferred:      104100 bytes
+HTML transferred:       4200 bytes
+Requests per second:    2832.30 [#/sec] (mean)
+Time per request:       3.531 [ms] (mean)
+Time per request:       0.353 [ms] (mean, across all concurrent requests)
+Transfer rate:          2879.32 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.5      0       3
+Processing:     0    3   2.4      3       9
+Waiting:        0    2   2.4      2       9
+Total:          0    3   2.5      3       9
+
+Percentage of the requests served within a certain time (ms)
+  50%      3
+  66%      3
+  75%      4
+  80%      4
+  90%      6
+  95%      9
+  98%      9
+  99%      9
+ 100%      9 (longest request)
+
+============================================================
+Product detail /api/products/1 - tai trung binh
+URL: http://localhost:3000/api/products/1
+Tong request: 500
+Request dong thoi: 50
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Finished 500 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/products/1
+Document Length:        42 bytes
+
+Concurrency Level:      50
+Time taken for tests:   0.182 seconds
+Complete requests:      500
+Failed requests:        0
+Non-2xx responses:      500
+Total transferred:      520500 bytes
+HTML transferred:       21000 bytes
+Requests per second:    2741.89 [#/sec] (mean)
+Time per request:       18.236 [ms] (mean)
+Time per request:       0.365 [ms] (mean, across all concurrent requests)
+Transfer rate:          2787.41 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.7      0       9
+Processing:     1   17   5.0     17      33
+Waiting:        0   12   4.9     12      26
+Total:          1   17   4.9     17      33
+
+Percentage of the requests served within a certain time (ms)
+  50%     17
+  66%     18
+  75%     19
+  80%     19
+  90%     21
+  95%     25
+  98%     31
+  99%     32
+ 100%     33 (longest request)
+
+============================================================
+Product detail /api/products/1 - tai nang
+URL: http://localhost:3000/api/products/1
+Tong request: 1000
+Request dong thoi: 100
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/products/1
+Document Length:        42 bytes
+
+Concurrency Level:      100
+Time taken for tests:   0.346 seconds
+Complete requests:      1000
+Failed requests:        0
+Non-2xx responses:      1000
+Total transferred:      1041000 bytes
+HTML transferred:       42000 bytes
+Requests per second:    2887.58 [#/sec] (mean)
+Time per request:       34.631 [ms] (mean)
+Time per request:       0.346 [ms] (mean, across all concurrent requests)
+Transfer rate:          2935.52 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.7      0      15
+Processing:     6   32   7.3     33      49
+Waiting:        0   26   7.2     26      41
+Total:          7   32   7.3     33      50
+
+Percentage of the requests served within a certain time (ms)
+  50%     33
+  66%     34
+  75%     36
+  80%     37
+  90%     39
+  95%     41
+  98%     46
+  99%     47
+ 100%     50 (longest request)
+
+============================================================
+Cart by user /api/cart/1 - tai nhe
+URL: http://localhost:3000/api/cart/1
+Tong request: 100
+Request dong thoi: 10
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient).....done
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/cart/1
+Document Length:        42 bytes
+
+Concurrency Level:      10
+Time taken for tests:   0.035 seconds
+Complete requests:      100
+Failed requests:        0
+Non-2xx responses:      100
+Total transferred:      104100 bytes
+HTML transferred:       4200 bytes
+Requests per second:    2838.57 [#/sec] (mean)
+Time per request:       3.523 [ms] (mean)
+Time per request:       0.352 [ms] (mean, across all concurrent requests)
+Transfer rate:          2885.70 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.8      0       5
+Processing:     0    3   2.6      4      10
+Waiting:        0    2   2.3      2       8
+Total:          0    3   2.6      4      10
+
+Percentage of the requests served within a certain time (ms)
+  50%      4
+  66%      5
+  75%      5
+  80%      5
+  90%      7
+  95%      8
+  98%      9
+  99%     10
+ 100%     10 (longest request)
+
+============================================================
+Cart by user /api/cart/1 - tai trung binh
+URL: http://localhost:3000/api/cart/1
+Tong request: 500
+Request dong thoi: 50
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Finished 500 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/cart/1
+Document Length:        42 bytes
+
+Concurrency Level:      50
+Time taken for tests:   0.168 seconds
+Complete requests:      500
+Failed requests:        0
+Non-2xx responses:      500
+Total transferred:      520500 bytes
+HTML transferred:       21000 bytes
+Requests per second:    2981.89 [#/sec] (mean)
+Time per request:       16.768 [ms] (mean)
+Time per request:       0.335 [ms] (mean, across all concurrent requests)
+Transfer rate:          3031.39 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   1.2      0      16
+Processing:     1   16   5.1     17      32
+Waiting:        0   10   5.8     11      27
+Total:          1   16   5.2     17      32
+
+Percentage of the requests served within a certain time (ms)
+  50%     17
+  66%     17
+  75%     18
+  80%     19
+  90%     22
+  95%     26
+  98%     29
+  99%     30
+ 100%     32 (longest request)
+
+============================================================
+Cart by user /api/cart/1 - tai nang
+URL: http://localhost:3000/api/cart/1
+Tong request: 1000
+Request dong thoi: 100
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/cart/1
+Document Length:        42 bytes
+
+Concurrency Level:      100
+Time taken for tests:   0.333 seconds
+Complete requests:      1000
+Failed requests:        0
+Non-2xx responses:      1000
+Total transferred:      1041000 bytes
+HTML transferred:       42000 bytes
+Requests per second:    3002.61 [#/sec] (mean)
+Time per request:       33.304 [ms] (mean)
+Time per request:       0.333 [ms] (mean, across all concurrent requests)
+Transfer rate:          3052.45 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.9      0      16
+Processing:    18   32   5.5     32      52
+Waiting:        0   26   6.0     26      46
+Total:         19   32   5.5     33      52
+
+Percentage of the requests served within a certain time (ms)
+  50%     33
+  66%     33
+  75%     34
+  80%     35
+  90%     38
+  95%     41
+  98%     45
+  99%     49
+ 100%     52 (longest request)
+
+============================================================
+Orders by user /api/orders/user/1 - tai nhe
+URL: http://localhost:3000/api/orders/user/1
+Tong request: 100
+Request dong thoi: 10
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient).....done
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/orders/user/1
+Document Length:        42 bytes
+
+Concurrency Level:      10
+Time taken for tests:   0.041 seconds
+Complete requests:      100
+Failed requests:        0
+Non-2xx responses:      100
+Total transferred:      104100 bytes
+HTML transferred:       4200 bytes
+Requests per second:    2438.43 [#/sec] (mean)
+Time per request:       4.101 [ms] (mean)
+Time per request:       0.410 [ms] (mean, across all concurrent requests)
+Transfer rate:          2478.91 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   1.5      0      15
+Processing:     0    3   4.7      3      19
+Waiting:        0    3   4.2      2      18
+Total:          0    4   5.0      3      20
+
+Percentage of the requests served within a certain time (ms)
+  50%      3
+  66%      4
+  75%      4
+  80%      4
+  90%     15
+  95%     18
+  98%     19
+  99%     20
+ 100%     20 (longest request)
+
+============================================================
+Orders by user /api/orders/user/1 - tai trung binh
+URL: http://localhost:3000/api/orders/user/1
+Tong request: 500
+Request dong thoi: 50
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Finished 500 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/orders/user/1
+Document Length:        42 bytes
+
+Concurrency Level:      50
+Time taken for tests:   0.160 seconds
+Complete requests:      500
+Failed requests:        0
+Non-2xx responses:      500
+Total transferred:      520500 bytes
+HTML transferred:       21000 bytes
+Requests per second:    3122.27 [#/sec] (mean)
+Time per request:       16.014 [ms] (mean)
+Time per request:       0.320 [ms] (mean, across all concurrent requests)
+Transfer rate:          3174.10 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.6      0       8
+Processing:     8   15   2.4     15      22
+Waiting:        0   10   2.3     10      19
+Total:          8   15   2.4     15      22
+
+Percentage of the requests served within a certain time (ms)
+  50%     15
+  66%     16
+  75%     16
+  80%     16
+  90%     17
+  95%     18
+  98%     20
+  99%     21
+ 100%     22 (longest request)
+
+============================================================
+Orders by user /api/orders/user/1 - tai nang
+URL: http://localhost:3000/api/orders/user/1
+Tong request: 1000
+Request dong thoi: 100
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/orders/user/1
+Document Length:        42 bytes
+
+Concurrency Level:      100
+Time taken for tests:   0.329 seconds
+Complete requests:      1000
+Failed requests:        0
+Non-2xx responses:      1000
+Total transferred:      1041000 bytes
+HTML transferred:       42000 bytes
+Requests per second:    3040.99 [#/sec] (mean)
+Time per request:       32.884 [ms] (mean)
+Time per request:       0.329 [ms] (mean, across all concurrent requests)
+Transfer rate:          3091.48 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.8      0      16
+Processing:     5   31   6.8     32      46
+Waiting:        1   25   6.4     26      37
+Total:          5   31   6.8     32      46
+
+Percentage of the requests served within a certain time (ms)
+  50%     32
+  66%     33
+  75%     34
+  80%     34
+  90%     37
+  95%     41
+  98%     43
+  99%     44
+ 100%     46 (longest request)
+
+============================================================
+User detail /api/users/1 - tai nhe
+URL: http://localhost:3000/api/users/1
+Tong request: 100
+Request dong thoi: 10
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient).....done
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/users/1
+Document Length:        42 bytes
+
+Concurrency Level:      10
+Time taken for tests:   0.040 seconds
+Complete requests:      100
+Failed requests:        0
+Non-2xx responses:      100
+Total transferred:      104100 bytes
+HTML transferred:       4200 bytes
+Requests per second:    2525.83 [#/sec] (mean)
+Time per request:       3.959 [ms] (mean)
+Time per request:       0.396 [ms] (mean, across all concurrent requests)
+Transfer rate:          2567.76 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.4      0       2
+Processing:     0    3   1.5      3       8
+Waiting:        0    2   1.5      2       8
+Total:          0    3   1.4      3       8
+
+Percentage of the requests served within a certain time (ms)
+  50%      3
+  66%      4
+  75%      4
+  80%      4
+  90%      6
+  95%      6
+  98%      8
+  99%      8
+ 100%      8 (longest request)
+
+============================================================
+User detail /api/users/1 - tai trung binh
+URL: http://localhost:3000/api/users/1
+Tong request: 500
+Request dong thoi: 50
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Finished 500 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/users/1
+Document Length:        42 bytes
+
+Concurrency Level:      50
+Time taken for tests:   0.171 seconds
+Complete requests:      500
+Failed requests:        0
+Non-2xx responses:      500
+Total transferred:      520500 bytes
+HTML transferred:       21000 bytes
+Requests per second:    2930.75 [#/sec] (mean)
+Time per request:       17.061 [ms] (mean)
+Time per request:       0.341 [ms] (mean, across all concurrent requests)
+Transfer rate:          2979.40 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.4      0       3
+Processing:     0   16   6.2     16      35
+Waiting:        0   11   5.9     10      34
+Total:          0   16   6.1     16      35
+
+Percentage of the requests served within a certain time (ms)
+  50%     16
+  66%     18
+  75%     19
+  80%     19
+  90%     24
+  95%     27
+  98%     32
+  99%     33
+ 100%     35 (longest request)
+
+============================================================
+User detail /api/users/1 - tai nang
+URL: http://localhost:3000/api/users/1
+Tong request: 1000
+Request dong thoi: 100
+============================================================
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+ab.exe : Completed 100 requests
+At line:43 char:7
++       & $ab -n $level.N -c $level.C $url 2>&1 | Out-File -FilePath $o ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Completed 100 requests:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /api/users/1
+Document Length:        42 bytes
+
+Concurrency Level:      100
+Time taken for tests:   0.324 seconds
+Complete requests:      1000
+Failed requests:        0
+Non-2xx responses:      1000
+Total transferred:      1041000 bytes
+HTML transferred:       42000 bytes
+Requests per second:    3084.06 [#/sec] (mean)
+Time per request:       32.425 [ms] (mean)
+Time per request:       0.324 [ms] (mean, across all concurrent requests)
+Transfer rate:          3135.26 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.7      0      15
+Processing:     4   30   7.1     31      50
+Waiting:        0   24   8.1     25      46
+Total:          4   30   7.1     31      50
+
+Percentage of the requests served within a certain time (ms)
+  50%     31
+  66%     33
+  75%     34
+  80%     35
+  90%     40
+  95%     43
+  98%     45
+  99%     46
+ 100%     50 (longest request)
+
+SKIP Notifications by user /api/notifications/user/1: JWT_TOKEN rong
+Finished: 2026-05-30 15:06:45

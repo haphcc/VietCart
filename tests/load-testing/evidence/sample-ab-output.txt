@@ -1,0 +1,12 @@
+Mẫu bằng chứng Apache Benchmark
+================================
+
+Đây là file mẫu để repo có sẵn nơi lưu bằng chứng test dạng .txt.
+Khi chạy thật, copy file kết quả từ tests/load-testing/results/*.txt sang tests/load-testing/evidence/.
+
+Các chỉ số cần trích:
+- Requests per second
+- Time per request
+- Failed requests
+- Non-2xx responses
+- Transfer rate

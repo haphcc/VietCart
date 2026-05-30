@@ -3,8 +3,8 @@ set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Chay load test voi BASE_URL=${BASE_URL:-http://localhost:3000}"
-echo "Ket qua se nam trong: $SCRIPT_DIR/results"
+echo "Chạy load test với BASE_URL=${BASE_URL:-http://localhost:3000}"
+echo "Kết quả sẽ nằm trong: $SCRIPT_DIR/results"
 echo ""
 
 bash "$SCRIPT_DIR/test-health.sh"
@@ -15,4 +15,4 @@ bash "$SCRIPT_DIR/test-users.sh"
 bash "$SCRIPT_DIR/test-notifications.sh"
 
 echo ""
-echo "Da chay xong cac script load test."
+echo "Đã chạy xong các script load test."
