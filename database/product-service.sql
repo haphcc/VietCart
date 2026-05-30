@@ -12,7 +12,24 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS stock_reservations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  product_id INT NOT NULL,
+  quantity INT NOT NULL,
+  order_id INT DEFAULT NULL,
+  status ENUM('reserved', 'confirmed', 'released') DEFAULT 'reserved',
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_stock_reservations_status_expires_at (status, expires_at),
+  INDEX idx_stock_reservations_product_id (product_id),
+  FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE stock_reservations;
 TRUNCATE TABLE products;
+SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO products (id, name, description, price, stock, image_url) VALUES
 (1, 'Áo thun VietCart', 'Áo thun cotton thoáng mát, phù hợp mặc hằng ngày', 129000, 50, '/images/products/product-1.jpg'),

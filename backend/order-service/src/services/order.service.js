@@ -26,6 +26,17 @@ function normalizeShippingInfo(info = {}) {
   };
 }
 
+function parseReservationIds(order) {
+  if (!order?.reservation_id) return [];
+
+  try {
+    const reservationIds = JSON.parse(order.reservation_id);
+    return Array.isArray(reservationIds) ? reservationIds : [];
+  } catch {
+    return [];
+  }
+}
+
 export const orderService = {
   async findByUser(userId) {
     const [rows] = await pool.query(
@@ -92,25 +103,27 @@ export const orderService = {
       throw createError(404, 'Order not found');
     }
 
-    if (status === 'cancelled') {
-      const [result] = await pool.query(
-        'UPDATE orders SET status = ? WHERE id = ? AND status <> ?',
-        [status, id, 'cancelled']
-      );
-
-      if (result.affectedRows === 0) {
-        return this.findById(id);
+    if (status === 'confirmed' && currentOrder.status !== 'confirmed') {
+      const reservationIds = parseReservationIds(currentOrder);
+      if (reservationIds.length > 0) {
+        await productClient.confirmReservation(reservationIds);
       }
+    }
 
-      const [items] = await pool.query('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [id]);
-      if (items.length > 0) {
-        await productClient.syncStock(items.map((item) => ({
-          product_id: item.product_id,
-          quantity: -Number(item.quantity)
-        })));
+    if (status === 'cancelled' && currentOrder.status !== 'cancelled') {
+      const reservationIds = parseReservationIds(currentOrder);
+
+      if (reservationIds.length > 0) {
+        await productClient.releaseReservation(reservationIds);
+      } else {
+        const [items] = await pool.query('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [id]);
+        if (items.length > 0) {
+          await productClient.syncStock(items.map((item) => ({
+            product_id: item.product_id,
+            quantity: -Number(item.quantity)
+          })));
+        }
       }
-
-      return this.findById(id);
     }
 
     await pool.query('UPDATE orders SET status = ? WHERE id = ?', [status, id]);
@@ -129,33 +142,43 @@ export const orderService = {
     if (!Array.isArray(items) || items.length === 0) {
       throw createError(400, 'Order must contain at least one item');
     }
-    
-    // 1. Fetch product details and check stock
-    const detailedItems = await Promise.all(items.map(async (item) => {
+
+    for (const item of items) {
       if (!item.product_id || Number(item.quantity) <= 0) {
         throw createError(400, 'Invalid order item');
       }
+    }
 
-      const product = await productClient.getById(item.product_id);
-      if (product.stock < item.quantity) {
-        throw new Error(`Product "${product.name}" does not have enough stock.`);
+    let reservation;
+    try {
+      reservation = await productClient.reserveStock(items);
+    } catch (reserveError) {
+      const message = reserveError.response?.data?.message || reserveError.message;
+      throw new Error(message);
+    }
+
+    const { reservationIds, reservedItems } = reservation;
+    const detailedItems = items.map((item, index) => {
+      if (!reservedItems[index]) {
+        throw createError(400, 'Invalid order item');
       }
+
       return {
         ...item,
-        price: product.price,
-        subtotal: Number(product.price) * Number(item.quantity)
+        quantity: Number(item.quantity),
+        price: reservedItems[index].price,
+        subtotal: Number(reservedItems[index].price) * Number(item.quantity)
       };
-    }));
+    });
     const total = detailedItems.reduce((sum, item) => sum + item.subtotal, 0);
 
     const connection = await pool.getConnection();
     let committed = false;
     let orderId = null;
-    
+
     try {
       await connection.beginTransaction();
-      
-      // 2. Create order in pending state
+
       const [orderResult] = await connection.query(
         `INSERT INTO orders (
           user_id,
@@ -165,8 +188,9 @@ export const orderService = {
           shipping_name,
           shipping_phone,
           shipping_address,
-          shipping_note
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          shipping_note,
+          reservation_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           userId,
           total,
@@ -175,7 +199,8 @@ export const orderService = {
           shippingInfo.name,
           shippingInfo.phone,
           shippingInfo.address,
-          shippingInfo.note
+          shippingInfo.note,
+          JSON.stringify(reservationIds)
         ]
       );
       orderId = orderResult.insertId;
@@ -189,26 +214,16 @@ export const orderService = {
 
       await connection.commit();
       committed = true;
-      
-      // 3. Sync stock via Product Service
-      try {
-        await productClient.syncStock(detailedItems.map(i => ({ 
-          product_id: i.product_id, 
-          quantity: i.quantity 
-        })));
-        
-        if (normalizedPaymentMethod === 'cod') {
-          // COD orders are accepted immediately; bank transfer orders wait for PayOS confirmation.
-          await this.updateStatus(orderId, 'confirmed');
-        }
-      } catch (syncError) {
-        // SAGA: Compensating transaction if stock sync fails
-        console.error('Stock sync failed, cancelling order:', syncError.message);
-        await this.updateStatus(orderId, 'cancelled');
-        throw new Error('Could not synchronize stock. Order has been cancelled.');
-      }
 
-      // Fail-safe cleanup and notification
+      const { eventBus } = await import('../events/eventBus.js');
+      eventBus.publish('order.created', {
+        orderId,
+        userId,
+        reservationIds,
+        items: detailedItems,
+        paymentMethod: normalizedPaymentMethod
+      });
+
       try {
         await cartClient.clearByUser(userId);
       } catch (error) {
@@ -240,6 +255,15 @@ export const orderService = {
       if (!committed) {
         await connection.rollback();
       }
+
+      if (reservationIds?.length > 0) {
+        try {
+          await productClient.releaseReservation(reservationIds);
+        } catch (releaseError) {
+          console.error('Failed to release reservation after order creation failure:', releaseError.message);
+        }
+      }
+
       throw error;
     } finally {
       connection.release();

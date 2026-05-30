@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS orders (
   shipping_address VARCHAR(500),
   shipping_note TEXT,
   status ENUM('pending', 'confirmed', 'shipping', 'completed', 'cancelled') NOT NULL DEFAULT 'pending',
+  reservation_id VARCHAR(500) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

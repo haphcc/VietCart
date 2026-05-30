@@ -4,6 +4,7 @@ import express from 'express';
 import morgan from 'morgan';
 import productRoutes from './routes/product.routes.js';
 import { loadEnv } from '../../shared/config/loadEnv.js';
+import { productService } from './services/product.service.js';
 
 loadEnv();
 
@@ -22,4 +23,9 @@ app.use('/products', productRoutes);
 
 app.listen(port, () => {
   console.log(`Product Service running on port ${port}`);
+
+  // Clean up expired stock reservations every 60 seconds
+  setInterval(() => {
+    productService.cleanupExpiredReservations();
+  }, 60_000);
 });
