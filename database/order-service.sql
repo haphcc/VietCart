@@ -1,6 +1,9 @@
 CREATE DATABASE IF NOT EXISTS vietcart_order CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE vietcart_order;
 
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
+
 CREATE TABLE IF NOT EXISTS orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
@@ -24,11 +27,6 @@ CREATE TABLE IF NOT EXISTS order_items (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
-
-SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE order_items;
-TRUNCATE TABLE orders;
-SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO orders (id, user_id, total_amount, payment_method, shipping_name, shipping_phone, shipping_address, shipping_note, status) VALUES
 (1, 1, 628000, 'momo', 'Khách hàng 1', '0900000001', 'Quận 1, TP. Hồ Chí Minh', 'Giao giờ hành chính', 'confirmed'),
