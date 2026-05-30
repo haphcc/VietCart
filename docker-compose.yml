@@ -1,4 +1,9 @@
 services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
   api-gateway:
     build: ./backend/api-gateway
     ports:
@@ -7,11 +12,13 @@ services:
       - ./backend/api-gateway/.env.example
     environment:
       PRODUCT_SERVICE_URL: http://product-service:3001
-      CART_SERVICE_URL: http://cart-service:3002
+      CART_SERVICE_URL: http://cart-lb:3002
       ORDER_SERVICE_URL: http://order-service:3003
       PAYMENT_SERVICE_URL: http://payment-service:3004
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       USER_SERVICE_URL: http://user-service:3006
+    depends_on:
+      - cart-lb
 
   product-service:
     build: ./backend/product-service
@@ -22,14 +29,46 @@ services:
     environment:
       DB_HOST: host.docker.internal
 
-  cart-service:
-    build: ./backend/cart-service
+  cart-lb:
+    image: nginx:1.27-alpine
     ports:
       - "3002:3002"
+    volumes:
+      - ./backend/cart-lb/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - cart-service-1
+      - cart-service-2
+      - cart-service-3
+
+  cart-service-1:
+    build: ./backend/cart-service
     env_file:
       - ./backend/cart-service/.env.example
     environment:
       DB_HOST: host.docker.internal
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+
+  cart-service-2:
+    build: ./backend/cart-service
+    env_file:
+      - ./backend/cart-service/.env.example
+    environment:
+      DB_HOST: host.docker.internal
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+
+  cart-service-3:
+    build: ./backend/cart-service
+    env_file:
+      - ./backend/cart-service/.env.example
+    environment:
+      DB_HOST: host.docker.internal
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
 
   order-service:
     build: ./backend/order-service
@@ -40,9 +79,11 @@ services:
     environment:
       DB_HOST: host.docker.internal
       PRODUCT_SERVICE_URL: http://product-service:3001
-      CART_SERVICE_URL: http://cart-service:3002
+      CART_SERVICE_URL: http://cart-lb:3002
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       USER_SERVICE_URL: http://user-service:3006
+    depends_on:
+      - cart-lb
 
   payment-service:
     build: ./backend/payment-service

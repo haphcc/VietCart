@@ -90,3 +90,9 @@ cd frontend/customer-web
 npm install
 npm run dev
 ```
+
+## Cart Service Scale va Redis Cache
+
+Huong dan chay nhieu instance Cart Service, dat Load Balancer phia truoc va dung Redis Cache cho gio hang nam tai:
+
+- `docs/cart-scale-cache.md`
