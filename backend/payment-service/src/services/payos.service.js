@@ -85,9 +85,8 @@ export const payosService = {
       && timingSafeEqual(expectedBuffer, signatureBuffer);
   },
 
-  async createPaymentLink({ order, buyer, items }) {
+  async createPaymentLink({ order, orderCode, buyer, items }) {
     const amount = Math.round(Number(order.total_amount));
-    const orderCode = Number(order.id);
     const description = `VC${order.id}`;
     const returnUrl = process.env.PAYOS_RETURN_URL || 'http://localhost:5173/orders';
     const cancelUrl = process.env.PAYOS_CANCEL_URL || 'http://localhost:5173/cart';

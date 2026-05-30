@@ -40,9 +40,19 @@ function getFirstTransactionReference(transactions) {
   return firstTransaction?.reference || null;
 }
 
+function generatePayosOrderCode() {
+  const randomPart = Math.floor(Math.random() * 1_000);
+  return Date.now() * 1_000 + randomPart;
+}
+
 export const paymentService = {
   async findByOrder(orderId) {
     const [rows] = await pool.query('SELECT * FROM payments WHERE order_id = ? ORDER BY id DESC', [orderId]);
+    return toPublicPayment(rows[0]);
+  },
+
+  async findByPayosOrderCode(orderCode) {
+    const [rows] = await pool.query('SELECT * FROM payments WHERE payos_order_code = ? LIMIT 1', [orderCode]);
     return toPublicPayment(rows[0]);
   },
 
@@ -70,8 +80,10 @@ export const paymentService = {
       };
     }
 
+    const payosOrderCode = generatePayosOrderCode();
     const payosData = await payosService.createPaymentLink({
       order,
+      orderCode: payosOrderCode,
       buyer: payload.buyer,
       items: payload.items
     });
@@ -92,7 +104,7 @@ export const paymentService = {
         amount,
         method,
         'pending',
-        payosData.orderCode,
+        payosOrderCode,
         payosData.paymentLinkId,
         payosData.checkoutUrl,
         payosData.qrCode
@@ -105,7 +117,7 @@ export const paymentService = {
       amount,
       method,
       status: 'pending',
-      payos_order_code: payosData.orderCode,
+      payos_order_code: payosOrderCode,
       payos_payment_link_id: payosData.paymentLinkId,
       payos_checkout_url: payosData.checkoutUrl,
       payos_qr_code: payosData.qrCode
@@ -120,11 +132,16 @@ export const paymentService = {
       [reference || null, orderCode]
     );
 
-    if (result.affectedRows > 0) {
-      await orderClient.updateStatus(orderCode, 'confirmed');
+    const payment = await this.findByPayosOrderCode(orderCode);
+    if (!payment) {
+      throw createError(404, 'Payment not found');
     }
 
-    return this.findByOrder(orderCode);
+    if (result.affectedRows > 0) {
+      await orderClient.updateStatus(payment.order_id, 'confirmed');
+    }
+
+    return this.findByOrder(payment.order_id);
   },
 
   async handlePayosWebhook(webhookData) {
